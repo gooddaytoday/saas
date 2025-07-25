@@ -9,17 +9,12 @@
   "scripts": {
     "dev": "nodemon server/server.ts",
     "lint": "eslint . --ext .ts,.tsx",
-    "test": "jest",
+    "test": "jest --config jest.config.ts",
+    "test:watch": "jest --config jest.config.ts --watch",
+    "test:coverage": "jest --config jest.config.ts --coverage",
     "postinstall": "rm -rf production-server/",
     "build": "tsc --project tsconfig.json",
     "start": "node production-server/server.js"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testPathIgnorePatterns": [
-      "production-server"
-    ],
-    "testEnvironment": "node"
   },
   "dependencies": {
     "aws-sdk": "^2.1514.0",

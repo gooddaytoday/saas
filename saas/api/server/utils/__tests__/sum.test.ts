@@ -1,4 +1,4 @@
-import { sum } from '../../../server/utils/sum';
+import { sum } from '../sum';
 
 console.log(sum(1, 2));
 
