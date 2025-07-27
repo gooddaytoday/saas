@@ -1,0 +1,4 @@
+# Allow Cursor to index docs folder despite being ignored by git
+!saas/
+!saas/docs/
+!saas/docs/**
