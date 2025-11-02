@@ -84,20 +84,19 @@ import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 ### Database testing
 
-When testing code that interacts with MongoDB:
+When testing code that interacts with MongoDB, use MongoDB Memory Server for isolated in-memory database testing:
 
 ```typescript
-import * as mongoose from 'mongoose';
 import User from '../../models/User';
+import { setupTestDb, teardownTestDb } from '../utils/__tests__/testDbHelper';
 
 describe('database test', () => {
   beforeAll(async () => {
-    const mongoUrl = process.env.MONGO_URL_TEST;
-    await mongoose.connect(mongoUrl);
+    await setupTestDb();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
+    await teardownTestDb();
   });
 
   test('should interact with database', async () => {
@@ -105,6 +104,8 @@ describe('database test', () => {
   });
 });
 ```
+
+MongoDB Memory Server automatically handles database lifecycle - it creates an in-memory MongoDB instance for each test suite and cleans it up afterward. No external database setup is required.
 
 ## Example tests
 
@@ -158,10 +159,9 @@ describe('API endpoints', () => {
 
 ## Environment variables for testing
 
-Create a `.env.test` file or set environment variables for testing:
+MongoDB Memory Server is used for database testing, so no `MONGO_URL_TEST` environment variable is required. However, you may still need other environment variables for testing:
 
 ```bash
-MONGO_URL_TEST=mongodb://localhost:27017/test-db
 NODE_ENV=test
 ```
 
@@ -203,10 +203,10 @@ Add the following to `.vscode/launch.json`:
 
 ## Database testing considerations
 
-1. **Use a separate test database** – never test against production data
-2. **Clean up test data** – remove test data after each test
-3. **Seed test data consistently** – use fixtures or factories for test data
-4. **Test database constraints** – verify unique indexes and validation rules
+1. **Use MongoDB Memory Server** – in-memory database provides complete isolation and requires no external setup
+2. **Clean up test data** – remove test data after each test (though MongoDB Memory Server handles this automatically)
+3. **Seed test data consistently** – use fixtures or factories for test data in `beforeAll` hooks
+4. **Test database constraints** – verify unique indexes and validation rules work correctly
 
 ## Useful resources
 

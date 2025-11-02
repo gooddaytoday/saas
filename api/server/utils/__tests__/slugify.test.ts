@@ -1,18 +1,10 @@
-import * as mongoose from 'mongoose';
 import User from '../../models/User';
 import { generateSlug } from '../slugify';
-
-// eslint-disable-next-line
-require('dotenv').config();
+import { setupTestDb, teardownTestDb } from './testDbHelper';
 
 describe('slugify', () => {
   beforeAll(async () => {
-    const mongoUrl = process.env.MONGO_URL_TEST;
-    if (!mongoUrl) {
-      throw new Error('MONGO_URL_TEST environment variable is not defined');
-    }
-
-    await mongoose.connect(mongoUrl);
+    await setupTestDb();
 
     const mockUsers = [
       {
@@ -61,6 +53,6 @@ describe('slugify', () => {
 
   afterAll(async () => {
     await User.deleteMany({ slug: { $in: ['john', 'john-johnson', 'john-johnson-1'] } });
-    await mongoose.disconnect();
+    await teardownTestDb();
   });
 });
