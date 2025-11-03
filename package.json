@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "prepare": "husky install",
+    "secretlint": "secretlint \"**/*\"",
+    "secretlint:fix": "secretlint \"**/*\" --fix",
     "test:e2e": "cd e2e && playwright test",
     "test:e2e:headed": "cd e2e && playwright test --headed",
     "test:e2e:debug": "cd e2e && PWDEBUG=1 playwright test --debug",
@@ -14,10 +17,19 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.41.0",
-    "playwright": "^1.41.0",
-    "dotenv": "^16.3.1",
-    "wait-on": "^7.2.0",
+    "@secretlint/secretlint-rule-basicauth": "^8.2.1",
+    "@secretlint/secretlint-rule-preset-recommend": "^8.2.1",
+    "@secretlint/secretlint-rule-privatekey": "^8.2.1",
     "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3"
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.3.1",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "playwright": "^1.41.0",
+    "secretlint": "^8.2.1",
+    "wait-on": "^7.2.0"
+  },
+  "lint-staged": {
+    "**/*": "secretlint"
   }
 }
