@@ -1,0 +1,33 @@
+{
+  "setup-worktree": [
+    "echo 'Setting up worktree dependencies...'",
+    "yarn install",
+    "cd api && yarn install && cd ..",
+    "cd app && yarn install && cd ..",
+    "cd lambda && yarn install && cd ..",
+    "cd e2e && yarn install && cd ..",
+    "echo 'Worktree setup complete!'"
+  ],
+  "setup-worktree-unix": [
+    "echo 'Setting up worktree dependencies (Unix)...'",
+    "yarn install",
+    "cd api && yarn install && cd ..",
+    "cd app && yarn install && cd ..",
+    "cd lambda && yarn install && cd ..",
+    "cd e2e && yarn install && cd ..",
+    "echo 'Worktree setup complete!'"
+  ],
+  "setup-worktree-windows": [
+    "echo Setting up worktree dependencies (Windows)...",
+    "yarn install",
+    "cd api && yarn install && cd ..",
+    "cd app && yarn install && cd ..",
+    "cd lambda && yarn install && cd ..",
+    "cd e2e && yarn install && cd ..",
+    "echo Worktree setup complete!"
+  ],
+  "delete-worktree": [
+    "echo 'Cleaning up worktree...'",
+    "echo 'Worktree cleanup complete!'"
+  ]
+}
