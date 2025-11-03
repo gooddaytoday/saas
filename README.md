@@ -130,6 +130,27 @@ cp e2e/.env.test.example e2e/.env.test
 - **App**: Jest + React Testing Library for components
 - **See also**: Individual project README files for testing details.
 
+### Security & Secret Detection
+
+#### Pre-commit Secret Detection
+- **Automatic Security**: Pre-commit hooks using Husky automatically scan for secrets before each commit
+- **Secret Detection**: Prevents accidental commits of API keys, passwords, private keys, and other sensitive data
+- **Supported Secrets**: AWS access keys, GCP API keys, SSH private keys, Basic Auth credentials, and more
+- **Manual Scanning**: Run `yarn secretlint` to manually scan the entire codebase for secrets
+- **Smart Exclusions**: `.env` files, test files, documentation, and build artifacts are automatically excluded
+
+#### Manual Commands
+```bash
+# Scan entire codebase for secrets
+yarn secretlint
+
+# Scan specific file or directory
+yarn secretlint path/to/file.js
+
+# Attempt automatic fixes (limited support)
+yarn secretlint:fix
+```
+
 ### Writing New E2E Tests
 
 #### Test Structure
