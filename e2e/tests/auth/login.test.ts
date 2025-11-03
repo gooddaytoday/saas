@@ -32,7 +32,7 @@ test('should redirect unauthenticated users to login', async ({ page }) => {
 });
 
 test('database should be accessible', async () => {
-  const testDb = getTestDb();
+  const testDb = await getTestDb();
 
   // Clear database
   await testDb.clear();

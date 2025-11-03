@@ -5,8 +5,9 @@ import { getTestDb } from '../helpers';
 test('should load login page', async ({ page }) => {
   await page.goto('/login');
   await expect(page).toHaveTitle(/login|sign/i);
-  const heading = page.locator('h1, h2, [role="heading"]');
-  await expect(heading.first()).toBeVisible();
+  // Check for the main heading text "Log in or Sign up"
+  const heading = page.locator('text=/Log in or Sign up/i');
+  await expect(heading).toBeVisible();
 });
 
 test('should have API server running', async ({ page }) => {
@@ -19,7 +20,7 @@ test('should have API server running', async ({ page }) => {
 });
 
 test('should have database connection', async () => {
-  const testDb = getTestDb();
+  const testDb = await getTestDb();
   await testDb.clear();
   // Database operations work without errors
   expect(true).toBe(true);

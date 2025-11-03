@@ -1,7 +1,8 @@
-import * as mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoClient } from 'mongodb';
 
 let mongoServer: MongoMemoryServer | null = null;
+let mongoClient: MongoClient | null = null;
 
 /**
  * Setup test database for e2e testing
@@ -10,7 +11,8 @@ let mongoServer: MongoMemoryServer | null = null;
 export async function setupE2EDatabase(): Promise<string> {
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
+  mongoClient = new MongoClient(mongoUri);
+  await mongoClient.connect();
   return mongoUri;
 }
 
@@ -19,7 +21,10 @@ export async function setupE2EDatabase(): Promise<string> {
  * Disconnects from MongoDB and stops the memory server
  */
 export async function teardownE2EDatabase(): Promise<void> {
-  await mongoose.disconnect();
+  if (mongoClient) {
+    await mongoClient.close();
+    mongoClient = null;
+  }
   if (mongoServer) {
     await mongoServer.stop();
     mongoServer = null;
@@ -31,15 +36,11 @@ export async function teardownE2EDatabase(): Promise<void> {
  * Useful for resetting database state between tests
  */
 export async function clearAllCollections(): Promise<void> {
-  if (mongoose.connection.readyState !== 1) {
-    throw new Error('Database is not connected');
+  if (!mongoClient) {
+    throw new Error('Database client is not connected');
   }
 
-  const db = mongoose.connection.db;
-  if (!db) {
-    throw new Error('Database connection object is not available');
-  }
-
+  const db = mongoClient.db();
   const collections = await db.listCollections().toArray();
 
   for (const collectionInfo of collections) {
@@ -52,17 +53,16 @@ export async function clearAllCollections(): Promise<void> {
  * Get MongoDB URI from active connection
  */
 export function getMongoUri(): string {
-  if (!mongoose.connection.host) {
+  if (!mongoServer) {
     throw new Error('Database is not connected');
   }
-  // Return the connection string from mongoose connection
-  const connection = mongoose.connection;
-  return connection.host ? `mongodb://${connection.host}:${connection.port}/${connection.name}` : '';
+  // Return the connection string from MongoMemoryServer
+  return mongoServer.getUri();
 }
 
 /**
  * Check if database is connected
  */
 export function isDbConnected(): boolean {
-  return mongoose.connection.readyState === 1;
+  return mongoClient !== null;
 }

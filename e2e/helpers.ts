@@ -29,10 +29,25 @@ export interface TestDb {
 /**
  * Get test database helper
  */
-export function getTestDb(): TestDb {
+export async function getTestDb(): Promise<TestDb> {
+  const servers = await getServers();
+  const { MongoClient } = await import('mongodb');
+
   return {
     clear: async () => {
-      await clearAllCollections();
+      const client = new MongoClient(servers.mongoUri);
+      await client.connect();
+      try {
+        const db = client.db();
+        const collections = await db.listCollections().toArray();
+
+        for (const collectionInfo of collections) {
+          const collection = db.collection(collectionInfo.name);
+          await collection.deleteMany({});
+        }
+      } finally {
+        await client.close();
+      }
     },
   };
 }
