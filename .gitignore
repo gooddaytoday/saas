@@ -24,3 +24,12 @@ dev-debug.log
 # Task files
 # tasks.json
 # tasks/
+
+# E2E Testing
+/e2e/.env.test
+/e2e/.test-state/
+/e2e/playwright-report/
+/e2e/test-results/
+/e2e/test-results.json
+/e2e/junit.xml
+/e2e/node_modules/
