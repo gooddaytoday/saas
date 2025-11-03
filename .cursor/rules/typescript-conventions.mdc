@@ -1,0 +1,70 @@
+---
+globs: "*.ts,*.tsx"
+description: "TypeScript coding conventions for SaaS project"
+---
+
+# TypeScript Development Conventions
+
+## 🎯 Code Style Guidelines
+
+### Import Organization
+- Group imports in this order: external libraries → internal libraries → relative imports
+- Use absolute imports for shared components and utilities
+- Example:
+```typescript
+// External libraries
+import React from 'react';
+import { NextPage } from 'next';
+
+// Internal libraries  
+import { Store } from '../lib/store';
+import withAuth from '../lib/withAuth';
+
+// Relative imports
+import PostForm from './PostForm';
+```
+
+### Type Definitions
+- Always use TypeScript interfaces for object shapes
+- Use type aliases for union types and complex type compositions
+- Define types close to where they're used, or in shared types directory
+- Use generic types for reusable components
+
+### API Integration
+- Use async/await pattern consistently
+- Handle errors with try/catch blocks
+- Use the established API patterns from [app/lib/api/](mdc:app/lib/api/)
+
+### State Management (MobX)
+- Keep stores focused on single responsibility
+- Use computed values for derived state  
+- Follow the store patterns established in [app/lib/store/](mdc:app/lib/store/)
+
+### Component Patterns
+- Use functional components with hooks
+- Wrap pages with [withAuth HOC](mdc:app/lib/withAuth.tsx) for protected routes
+- Follow Material-UI theming from [app/lib/theme.ts](mdc:app/lib/theme.ts)
+- Use shared styles from [app/lib/sharedStyles.ts](mdc:app/lib/sharedStyles.ts)
+
+### Testing
+- Write unit tests for utilities and pure functions
+- Use Jest testing patterns established in project
+- Test files should be in `__tests__` directories or named `.test.ts`
+
+## 🔧 API Development (Express/Node.js)
+
+### Route Structure  
+- Follow the pattern in [api/server/api/](mdc:api/server/api/)
+- Use proper HTTP status codes
+- Implement proper error handling middleware
+- Use TypeScript interfaces for request/response types
+
+### Database Integration
+- Use Mongoose schemas from [api/server/models/](mdc:api/server/models/)
+- Always handle database errors
+- Use proper validation schemas
+
+### Authentication
+- Use the established auth patterns from [api/server/google-auth.ts](mdc:api/server/google-auth.ts)
+- Implement proper session management
+- Validate user permissions in middleware

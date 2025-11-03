@@ -1,0 +1,182 @@
+---
+description: API testing guidelines and patterns using Jest for Node.js/TypeScript server testing
+globs: api/**/*.ts,api/**/*.test.ts,api/**/*.spec.ts
+---
+
+# API Testing Guidelines
+
+Руководство по написанию тестов для API сервера с использованием Jest и TypeScript.
+
+## **Структура тестов**
+
+- **Размещение тестов**: Создавайте тесты в папках `__tests__` рядом с тестируемыми файлами
+- **Именование**: Используйте суффикс `.test.ts` для тестовых файлов
+- **Организация**: Группируйте связанные тесты в `describe` блоки
+
+```
+server/
+  utils/
+    slugify.ts
+    __tests__/
+      slugify.test.ts
+  models/
+    User.ts
+    __tests__/
+      User.test.ts
+  api/
+    team-leader.ts
+    __tests__/
+      team-leader.test.ts
+```
+
+## **Основные паттерны Jest**
+
+### Базовая структура теста
+```typescript
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import { functionToTest } from '../functionToTest';
+
+describe('functionToTest', () => {
+  test('should return expected result', () => {
+    const result = functionToTest('input');
+    expect(result).toBe('expected output');
+  });
+});
+```
+
+### Тестирование async функций
+```typescript
+describe('asyncFunction', () => {
+  test('resolves with correct value', async () => {
+    await expect(asyncFunction('input')).resolves.toBe('expected output');
+  });
+
+  test('rejects with error', async () => {
+    await expect(asyncFunction('invalid')).rejects.toThrow('Error message');
+  });
+});
+```
+
+## **Тестирование базы данных MongoDB**
+
+### Подключение к тестовой БД
+Используйте MongoDB Memory Server для изолированного тестирования в памяти:
+```typescript
+import User from '../../models/User';
+import { setupTestDb, teardownTestDb } from '../utils/__tests__/testDbHelper';
+
+describe('database test', () => {
+  beforeAll(async () => {
+    await setupTestDb();
+  });
+
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
+  test('should interact with database', async () => {
+    // Your database test logic
+  });
+});
+```
+
+MongoDB Memory Server автоматически создает изолированный экземпляр MongoDB в памяти для каждого набора тестов и очищает его после завершения. Внешняя настройка базы данных не требуется.
+
+### Очистка тестовых данных
+```typescript
+afterEach(async () => {
+  // Очищаем коллекции после каждого теста
+  await User.deleteMany({});
+});
+```
+
+## **Тестирование API endpoints**
+
+```typescript
+import request from 'supertest';
+import app from '../../server';
+
+describe('API endpoints', () => {
+  test('GET /api/test should return 200', async () => {
+    const response = await request(app)
+      .get('/api/test')
+      .expect(200);
+    
+    expect(response.body).toEqual(expect.objectContaining({
+      status: 'success'
+    }));
+  });
+
+  test('POST /api/users should create user', async () => {
+    const userData = { name: 'Test User', email: 'test@example.com' };
+    
+    const response = await request(app)
+      .post('/api/users')
+      .send(userData)
+      .expect(201);
+    
+    expect(response.body.user).toEqual(expect.objectContaining(userData));
+  });
+});
+```
+
+## **Переменные окружения для тестов**
+
+- **MongoDB Memory Server**: Используется автоматически, переменная `MONGO_URL_TEST` не требуется
+- **Установите**: `NODE_ENV=test` в тестовом окружении
+- **Загружайте**: другие переменные окружения через `jest.setup.ts` или в `beforeAll`
+
+## **Best Practices**
+
+### ✅ DO:
+- **Описательные имена тестов** - четко описывайте что тестируете
+- **Группировка тестов** - используйте `describe` для логической группировки
+- **Очистка после тестов** - используйте `afterEach`/`beforeEach` для сброса состояния
+- **Тестируйте поведение, не реализацию** - фокусируйтесь на ожидаемых результатах
+- **Изоляция тестов** - каждый тест должен быть независимым
+- **Моки внешних зависимостей** - используйте Jest моки для внешних сервисов
+- **Тестируйте крайние случаи** - включайте тесты для ошибок и граничных условий
+
+### ❌ DON'T:
+- Не тестируйте против production базы данных
+- Не оставляйте тестовые данные после тестов
+- Не делайте тесты зависимыми друг от друга
+- Не тестируйте детали реализации
+
+## **Команды для запуска тестов**
+
+Ссылайтесь на [TESTING.md](mdc:api/TESTING.md) для полного списка команд:
+
+```bash
+# Запуск всех тестов
+yarn test
+
+# Запуск с отслеживанием изменений
+yarn test --watch
+
+# Запуск с покрытием кода
+yarn test --coverage
+
+# Запуск конкретного теста
+yarn test slugify.test.ts
+```
+
+## **Конфигурация**
+
+- **Jest config**: [jest.config.ts](mdc:api/jest.config.ts)
+- **Setup файл**: [jest.setup.ts](mdc:api/jest.setup.ts)
+- **TypeScript preset**: `ts-jest` для поддержки TypeScript
+- **Test environment**: `node` для серверного кода
+
+## **Покрытие кода**
+
+После запуска `yarn test --coverage`:
+- HTML отчет: `coverage/lcov-report/index.html`
+- LCOV формат: `coverage/lcov.info` для CI/CD
+
+## **Примеры тестов из кодовой базы**
+
+- [slugify.test.ts](mdc:api/server/utils/__tests__/slugify.test.ts) - тестирование утилит
+- [sum.test.ts](mdc:api/server/utils/__tests__/sum.test.ts) - базовые unit тесты
+
+Обращайтесь к [TESTING.md](mdc:api/TESTING.md) за дополнительными примерами и подробностями.

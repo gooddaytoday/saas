@@ -1,0 +1,108 @@
+---
+alwaysApply: true
+description: "SaaS Boilerplate Project Structure and Development Guide"
+---
+
+# SaaS Boilerplate Project Structure
+
+This is a full-stack SaaS application built as a monorepo with three main components. Always refer to component-specific README.md files for detailed information about each directory.
+
+## 🏗️ Project Architecture
+
+### 1. **API Server** (`/api/`)
+- **Tech Stack**: Node.js, Express, TypeScript, MongoDB, Mongoose, Socket.IO, Stripe
+- **Purpose**: Backend API server providing authentication, team management, real-time communication
+- **Key Features**: 
+  - Google OAuth & passwordless authentication  
+  - Stripe payment integration
+  - AWS S3 file uploads, AWS SES email sending
+  - WebSocket real-time communication
+- **Entry Point**: [api/server/server.ts](mdc:api/server/server.ts)
+- **Config**: [api/package.json](mdc:api/package.json), [api/nodemon.json](mdc:api/nodemon.json)
+
+### 2. **Client Application** (`/app/`)
+- **Tech Stack**: Next.js, React, TypeScript, Material-UI, MobX
+- **Purpose**: User-facing web application with SSR
+- **Key Features**:
+  - Server-side rendering with Next.js
+  - Material-UI component library
+  - MobX state management
+  - Protected routes with authentication HOC
+- **Entry Point**: [app/pages/_app.tsx](mdc:app/pages/_app.tsx)
+- **Config**: [app/package.json](mdc:app/package.json), [app/next.config.js](mdc:app/next.config.js)
+
+### 3. **Lambda Functions** (`/lambda/`)
+- **Tech Stack**: Node.js, TypeScript, Serverless Framework
+- **Purpose**: Serverless functions for AWS Lambda
+- **Entry Point**: [lambda/handler.ts](mdc:lambda/handler.ts)
+- **Config**: [lambda/serverless.yml](mdc:lambda/serverless.yml)
+
+### 4. **E2E Testing** (`/e2e/`)
+- **Tech Stack**: Playwright, TypeScript, MongoDB Memory Server, Node.js
+- **Purpose**: End-to-end testing infrastructure for full-stack integration testing
+- **Key Features**:
+  - Automated server lifecycle management (API + App servers)
+  - In-memory MongoDB for isolated database testing
+  - Parallel test execution with worker isolation
+  - Screenshot/video recording on failures
+  - Docker and native CI/CD support
+- **Entry Point**: [e2e/global-setup.ts](mdc:e2e/global-setup.ts)
+- **Config**: [e2e/playwright.config.ts](mdc:e2e/playwright.config.ts), [e2e/package.json](mdc:e2e/package.json)
+
+## 📚 Documentation & Learning Resources
+
+- **Complete Documentation**: All detailed guides are in [docs/](mdc:docs/) directory
+- **Chapter-based Learning**: Each file in docs/ represents a development chapter explaining specific features
+- **Component README Files**: Every major directory contains its own [README.md](mdc:README.md) explaining local structure
+
+## 🛠️ Development Guidelines
+
+### File Organization
+- **API Routes**: [api/server/api/](mdc:api/server/api/) - Express routes organized by functionality
+- **Data Models**: [api/server/models/](mdc:api/server/models/) - MongoDB/Mongoose schemas  
+- **React Components**: [app/components/](mdc:app/components/) - Organized by feature (common, discussions, posts, teams)
+- **Client Store**: [app/lib/store/](mdc:app/lib/store/) - MobX stores for state management
+- **Pages**: [app/pages/](mdc:app/pages/) - Next.js pages and routing
+
+### Key Conventions
+- TypeScript is used throughout the entire stack
+- Each component/feature has its own directory with README.md
+- API endpoints follow RESTful conventions
+- Real-time features use WebSocket connections
+- Authentication handled via HOCs and middleware
+- **E2E Testing**: Playwright with MongoDB Memory Server for full-stack integration tests
+- **Unit Testing**: Jest for API and React components
+- **Security**: Automatic secret detection with secretlint prevents API key leaks in commits
+
+### Environment Setup
+- Run `yarn` in root and each project directory (`api/`, `app/`, `lambda/`, `e2e/`)****
+- Each project requires `.env` file with specific configuration
+- **E2E Testing**: Copy `e2e/.env.test.example` to `e2e/.env.test`
+- Start development: `yarn dev` in both `api/` and `app/` **directories**
+- Run e2e tests: `yarn test:e2e` from root directory
+
+### Security & Secret Detection
+- **Pre-commit Hooks**: Husky automatically runs secretlint before each commit
+- **Secret Detection**: Prevents accidental commits of API keys, passwords, private keys, and other secrets
+- **Manual Check**: Run `yarn secretlint` to manually scan for secrets
+- **Exclusions**: `.env` files, test files, and documentation are automatically excluded
+
+## 🔍 Navigation Tips
+
+When working on:
+- **Authentication**: Check [api/server/google-auth.ts](mdc:api/server/google-auth.ts), [api/server/passwordless-auth.ts](mdc:api/server/passwordless-auth.ts), [app/lib/withAuth.tsx](mdc:app/lib/withAuth.tsx)
+- **Database Models**: Look in [api/server/models/](mdc:api/server/models/)
+- **UI Components**: Browse [app/components/](mdc:app/components/) organized by feature
+- **API Endpoints**: Find in [api/server/api/](mdc:api/server/api/)
+- **State Management**: Check [app/lib/store/](mdc:app/lib/store/)
+- **Styling**: Material-UI theme in [app/lib/theme.ts](mdc:app/lib/theme.ts), shared styles in [app/lib/sharedStyles.ts](mdc:app/lib/sharedStyles.ts)
+- **E2E Testing**: See [e2e/README.md](mdc:e2e/README.md) and [e2e/CONTRIBUTING.md](mdc:e2e/CONTRIBUTING.md) for testing guidelines
+- **Security**: Check `.secretlintrc.json` and `.secretlintignore` for secret detection configuration
+
+**E2E Testing Key Files:**
+- **Test Helpers**: [e2e/helpers.ts](mdc:e2e/helpers.ts) - Server and database access
+- **Server Management**: [e2e/utils/serverManager.ts](mdc:e2e/utils/serverManager.ts) - Automatic server lifecycle
+- **Test Config**: [e2e/playwright.config.ts](mdc:e2e/playwright.config.ts) - Playwright configuration
+- **Test Rules**: [.cursor/rules/e2e-testing.mdc](mdc:.cursor/rules/e2e-testing.mdc) - Complete testing guidelines
+
+Always consult the relevant README.md file in each directory for specific implementation details and local conventions.

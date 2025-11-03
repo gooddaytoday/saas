@@ -18,6 +18,10 @@ dev-debug.log
 *.njsproj
 *.sln
 *.sw?
+# Cursor rules (explicitly include)
+!.cursor/
+!.cursor/rules/
+!.cursor/rules/*.mdc
 # OS specific
 .DS_Store
 

@@ -1,0 +1,304 @@
+---
+description: Frontend testing guidelines using Jest, React Testing Library, and Next.js testing patterns
+globs: app/**/*.ts,app/**/*.tsx,app/**/*.test.ts,app/**/*.test.tsx,app/**/*.spec.ts,app/**/*.spec.tsx
+---
+
+# Frontend Testing Guidelines
+
+Руководство по написанию тестов для Next.js приложения с использованием Jest и React Testing Library.
+
+## **Структура тестов**
+
+- **Размещение тестов**: Создавайте тесты в папках `__tests__` рядом с тестируемыми файлами
+- **Именование**: Используйте суффикс `.test.tsx` для React компонентов и `.test.ts` для утилит
+- **Организация**: Группируйте связанные тесты в `describe` блоки
+
+```
+components/
+  common/
+    Notifier.tsx
+    __tests__/
+      Notifier.test.tsx
+lib/
+  isMobile.ts
+  __tests__/
+    isMobile.test.ts
+```
+
+## **Основные библиотеки для тестирования**
+
+### React Testing Library
+```typescript
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+```
+
+### Jest DOM матчеры
+```typescript
+expect(element).toBeInTheDocument();
+expect(element).toHaveAttribute('data-testid', 'button');
+expect(element).toHaveTextContent('Text');
+expect(element).toHaveClass('active');
+expect(element).toBeVisible();
+```
+
+## **Паттерны тестирования React компонентов**
+
+### Базовый тест компонента
+```typescript
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import MyComponent from '../MyComponent';
+
+describe('MyComponent', () => {
+  test('renders correctly', () => {
+    render(<MyComponent title="Test" />);
+    expect(screen.getByText('Test')).toBeInTheDocument();
+  });
+
+  test('handles click events', async () => {
+    const handleClick = jest.fn();
+    render(<MyComponent onClick={handleClick} />);
+    
+    await userEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+});
+```
+
+### Тестирование с пропсами
+```typescript
+describe('ComponentWithProps', () => {
+  test('renders with required props', () => {
+    render(<ComponentWithProps title="Title" description="Description" />);
+    
+    expect(screen.getByText('Title')).toBeInTheDocument();
+    expect(screen.getByText('Description')).toBeInTheDocument();
+  });
+
+  test('applies conditional styling', () => {
+    render(<ComponentWithProps variant="primary" />);
+    
+    expect(screen.getByTestId('component')).toHaveClass('primary');
+  });
+});
+```
+
+### Тестирование асинхронных операций
+```typescript
+test('handles async data loading', async () => {
+  render(<AsyncComponent />);
+  
+  expect(screen.getByText('Loading...')).toBeInTheDocument();
+  
+  await waitFor(() => {
+    expect(screen.getByText('Data loaded')).toBeInTheDocument();
+  });
+  
+  expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+});
+```
+
+## **Тестирование пользовательских взаимодействий**
+
+### User Events (рекомендуемый подход)
+```typescript
+import userEvent from '@testing-library/user-event';
+
+test('user can type in input field', async () => {
+  const user = userEvent.setup();
+  render(<SearchForm />);
+  
+  const input = screen.getByPlaceholderText('Search...');
+  await user.type(input, 'test query');
+  
+  expect(input).toHaveValue('test query');
+});
+```
+
+### FireEvent (для простых случаев)
+```typescript
+test('button click changes state', () => {
+  render(<ToggleButton />);
+  
+  const button = screen.getByRole('button');
+  fireEvent.click(button);
+  
+  expect(button).toHaveTextContent('On');
+});
+```
+
+## **Мокирование модулей и функций**
+
+### Мокирование внешних библиотек
+```typescript
+// Мокирование Material-UI компонентов
+jest.mock('@mui/material/Button', () => {
+  return function MockButton({ children, onClick, ...props }) {
+    return <button onClick={onClick} {...props}>{children}</button>;
+  };
+});
+
+// Мокирование Next.js router
+jest.mock('next/router', () => ({
+  useRouter() {
+    return {
+      push: jest.fn(),
+      pathname: '/',
+      query: {},
+      asPath: '/',
+    };
+  },
+}));
+```
+
+### Мокирование функций
+```typescript
+test('calls API on submit', async () => {
+  const mockApiCall = jest.fn().mockResolvedValue({ success: true });
+  
+  render(<FormComponent onSubmit={mockApiCall} />);
+  
+  await userEvent.click(screen.getByRole('button', { name: /submit/i }));
+  
+  expect(mockApiCall).toHaveBeenCalledWith(expect.objectContaining({
+    data: expect.any(Object)
+  }));
+});
+```
+
+## **Тестирование утилитных функций**
+
+```typescript
+import { myUtilFunction } from '../myUtilFunction';
+
+describe('myUtilFunction', () => {
+  test('returns correct result for valid input', () => {
+    const result = myUtilFunction('input');
+    expect(result).toBe('expected output');
+  });
+
+  test('handles edge cases', () => {
+    expect(myUtilFunction('')).toBe('');
+    expect(myUtilFunction(null)).toBe(null);
+  });
+});
+```
+
+## **Снапшот тестирование**
+
+```typescript
+test('component renders consistently', () => {
+  const { container } = render(<ComplexComponent data={mockData} />);
+  expect(container.firstChild).toMatchSnapshot();
+});
+
+// Обновление снапшотов
+// yarn test --updateSnapshot
+```
+
+## **Best Practices**
+
+### ✅ DO:
+- **Тестируйте поведение, не реализацию** - фокусируйтесь на том, что видит пользователь
+- **Используйте семантические запросы** - `getByRole`, `getByLabelText`, `getByText`
+- **Одно утверждение на тест** - каждый тест должен проверять одно поведение
+- **Описательные имена тестов** - четко описывайте что тестируете
+- **Группировка тестов** - используйте `describe` для логической группировки
+- **Очистка после тестов** - используйте `afterEach` для сброса состояния
+- **Мокируйте внешние зависимости** - изолируйте компоненты от внешних сервисов
+
+### ❌ DON'T:
+- Не тестируйте детали реализации (internal state, private methods)
+- Не полагайтесь на конкретную структуру DOM
+- Не используйте `container.querySelector` вместо семантических запросов
+- Не делайте тесты зависимыми друг от друга
+- Не тестируйте библиотечный код (React, Material-UI)
+
+## **Запросы элементов (приоритет)**
+
+1. **getByRole** - самый доступный способ
+2. **getByLabelText** - для форм
+3. **getByPlaceholderText** - для input полей
+4. **getByText** - для текстового контента
+5. **getByDisplayValue** - для form элементов с значениями
+6. **getByAltText** - для изображений
+7. **getByTitle** - для элементов с title
+8. **getByTestId** - последний вариант
+
+```typescript
+// ✅ Хорошо
+screen.getByRole('button', { name: /submit/i });
+screen.getByLabelText(/username/i);
+
+// ❌ Плохо
+container.querySelector('.submit-button');
+screen.getByTestId('submit-button'); // только если нет других вариантов
+```
+
+## **Команды для запуска тестов**
+
+Ссылайтесь на [TESTING.md](mdc:app/TESTING.md) для полного списка команд:
+
+```bash
+# Запуск всех тестов
+yarn test
+
+# Запуск в watch режиме
+yarn test:watch
+
+# Запуск с покрытием кода
+yarn test:coverage
+
+# Запуск конкретного теста
+yarn test Notifier.test.tsx
+```
+
+## **Конфигурация**
+
+- **Jest config**: [jest.config.js](mdc:app/jest.config.js)
+- **Setup файл**: [jest.setup.js](mdc:app/jest.setup.js)
+- **Test environment**: `jest-environment-jsdom` для React компонентов
+- **Module mapping**: Поддержка path aliases (`@/...`)
+
+## **Покрытие кода**
+
+После запуска `yarn test:coverage`:
+- HTML отчет: `coverage/lcov-report/index.html`
+- LCOV формат: `coverage/lcov.info` для CI/CD
+
+## **Отладка тестов**
+
+### Использование debug в тестах
+```typescript
+test('debug example', () => {
+  const { debug } = render(<MyComponent />);
+  debug(); // Выводит HTML в консоль
+  
+  // Или для конкретного элемента
+  debug(screen.getByRole('button'));
+});
+```
+
+### VS Code конфигурация
+Добавьте в `.vscode/launch.json` для отладки:
+
+```json
+{
+  "type": "node",
+  "request": "launch",
+  "name": "Jest Debug App",
+  "program": "${workspaceFolder}/app/node_modules/.bin/jest",
+  "args": ["--runInBand"],
+  "console": "integratedTerminal",
+  "internalConsoleOptions": "neverOpen",
+  "cwd": "${workspaceFolder}/app"
+}
+```
+
+## **Примеры тестов из кодовой базы**
+
+- [Notifier.test.tsx](mdc:app/components/common/__tests__/Notifier.test.tsx) - тестирование React компонентов
+- [isMobile.test.ts](mdc:app/lib/__tests__/isMobile.test.ts) - тестирование утилит
+
+Обращайтесь к [TESTING.md](mdc:app/TESTING.md) за дополнительными примерами и подробностями.

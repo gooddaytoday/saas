@@ -1,0 +1,448 @@
+---
+description: E2E testing guidelines using Playwright, TypeScript, MongoDB Memory Server for SaaS application
+alwaysApply: false
+---
+# E2E Testing with Playwright - Complete Guide
+
+## Critical Architecture Rules
+
+### Test Import Pattern - CRITICAL
+
+**ALWAYS use standard `test` from `@playwright/test`. NEVER use custom fixtures or extended test objects.**
+
+```typescript
+// ✅ CORRECT - Standard test import
+import { test, expect } from '@playwright/test';
+import { getServers } from '../helpers';
+import { getTestDb } from '../helpers';
+
+test('should do something', async ({ page }) => {
+  const servers = await getServers();
+  const testDb = getTestDb();
+  // Test logic
+});
+
+// ❌ WRONG - Do NOT use test.describe() blocks
+test.describe('Feature', () => {
+  test('should do something', async ({ page }) => {});
+});
+
+// ❌ WRONG - Do NOT import from fixtures
+import { test, expect } from '../fixtures';
+```
+
+**Reason**: Custom fixtures with `test.extend()` cause Playwright errors: "Playwright Test did not expect test.describe() to be called here". Use helper functions instead.
+
+### Server Access Pattern
+
+**Use `getServers()` helper function to access API and App URLs:**
+
+```typescript
+import { getServers } from '../helpers';
+
+test('api test', async ({ page }) => {
+  const servers = await getServers();
+  
+  // Access API server
+  const response = await page.request.get(`${servers.apiUrl}/api/v1/endpoint`);
+  
+  // Access App server  
+  await page.goto(servers.appUrl + '/login');
+});
+```
+
+**Server URLs available:**
+- `servers.apiUrl` - API server URL (default: `http://localhost:8000`)
+- `servers.appUrl` - App server URL (default: `http://localhost:3000`)
+- `servers.mongoUri` - MongoDB Memory Server URI
+
+### Database Access Pattern
+
+**Use `getTestDb()` helper function for database operations:**
+
+```typescript
+import { getTestDb } from '../helpers';
+
+test('database test', async () => {
+  const testDb = getTestDb();
+  
+  // Clear all collections before test
+  await testDb.clear();
+  
+  // Test logic that uses database
+});
+```
+
+**Available operations:**
+- `testDb.clear()` - Clears all collections in the test database
+
+## Test Structure
+
+### Directory Organization
+
+```
+e2e/
+├── tests/                  # Test files
+│   ├── smoke.test.ts      # Smoke tests
+│   └── feature/           # Feature-specific tests
+│       └── feature.test.ts
+├── helpers.ts             # Server and DB helpers (USE THIS)
+├── fixtures/              # Legacy fixtures (DO NOT USE for test import)
+├── utils/                 # Utilities (server managers, factories, etc.)
+├── config/                # Configuration
+├── global-setup.ts        # Runs once before all tests
+├── global-teardown.ts     # Runs once after all tests
+└── playwright.config.ts   # Playwright configuration
+```
+
+### Test File Pattern
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { getServers } from '../helpers';
+import { getTestDb } from '../helpers';
+
+// Individual tests - NO describe blocks
+test('should load login page', async ({ page }) => {
+  await page.goto('/login');
+  await expect(page).toHaveTitle(/login|sign/i);
+});
+
+test('should access API', async ({ page }) => {
+  const servers = await getServers();
+  const response = await page.request.get(`${servers.apiUrl}/api/v1/public/get-user`);
+  expect(response.status()).toBeLessThan(500);
+});
+
+test('should clear database', async () => {
+  const testDb = getTestDb();
+  await testDb.clear();
+  expect(true).toBe(true);
+});
+```
+
+## Server Architecture
+
+### Server Lifecycle
+
+**Servers are managed automatically:**
+
+1. **Global Setup** (`global-setup.ts`):
+   - Starts MongoDB Memory Server (in-memory)
+   - Starts API server on port 8000 (or `E2E_API_PORT`)
+   - Starts App server on port 3000 (or `E2E_APP_PORT`)
+   - Stores server URLs in global state
+
+2. **During Tests**:
+   - Servers remain running
+   - Each test can access servers via `getServers()`
+   - Database is isolated per test worker
+
+3. **Global Teardown** (`global-teardown.ts`):
+   - Stops all servers gracefully
+   - Cleans up MongoDB Memory Server
+   - Removes state files
+
+### Server Configuration
+
+**Environment variables** (`.env.test`):
+- `E2E_API_PORT=8000` - API server port
+- `E2E_APP_PORT=3000` - App server port
+- `E2E_API_URL=http://localhost:8000` - API URL (auto-set)
+- `E2E_APP_URL=http://localhost:3000` - App URL (auto-set)
+- `SESSION_SECRET=test-key` - Required for sessions
+- `COOKIE_DOMAIN=localhost` - Required for cookies
+
+**Default baseURL**: `http://localhost:3000` (configured in `playwright.config.ts`)
+
+## Database Testing
+
+### MongoDB Memory Server
+
+**Features:**
+- In-memory MongoDB instance
+- Automatic isolation between test runs
+- No external database setup required
+- Supports parallel execution
+
+**Usage:**
+```typescript
+import { getTestDb } from '../helpers';
+
+test('with clean database', async () => {
+  const testDb = getTestDb();
+  
+  // Clear database before test
+  await testDb.clear();
+  
+  // Database is now empty and ready
+});
+```
+
+**Connection State:**
+- Database is connected in global-setup
+- Each test worker has isolated database
+- Collections are cleared automatically between tests via fixtures
+
+## Test Data Factories
+
+**Use factories from `utils/factories.ts`:**
+
+```typescript
+import { createUserData, createTeamData } from '../utils/factories';
+
+test('with test data', async ({ page }) => {
+  const userData = createUserData({ 
+    email: 'custom@example.com',
+    name: 'Custom Name'
+  });
+  
+  const teamData = createTeamData({ name: 'My Team' });
+  
+  // Use data in test
+});
+```
+
+**Available factories:**
+- `createUserData(overrides?)` - User test data
+- `createTeamData(overrides?)` - Team test data
+- `createDiscussionData(overrides?)` - Discussion test data
+- `createPostData(overrides?)` - Post test data
+
+## API Testing Helpers
+
+**Use API helpers from `utils/apiHelpers.ts`:**
+
+```typescript
+import { makeApiRequest, createUserViaApi } from '../utils/apiHelpers';
+import { getServers } from '../helpers';
+
+test('api operations', async () => {
+  const servers = await getServers();
+  
+  // Create user via API
+  const user = await createUserViaApi(servers.apiUrl, {
+    email: 'test@example.com',
+    name: 'Test User'
+  });
+  
+  // Make custom API request
+  const response = await makeApiRequest(servers.apiUrl, '/api/v1/endpoint', {
+    method: 'POST',
+    data: { key: 'value' }
+  });
+});
+```
+
+## Waiting and Retry Utilities
+
+**Use utilities from `utils/wait.ts`:**
+
+```typescript
+import { retry, waitForCondition, waitForPort } from '../utils/wait';
+
+test('with retry logic', async ({ page }) => {
+  await retry(async () => {
+    const response = await page.request.get('/api/data');
+    expect(response.ok).toBe(true);
+  }, 5); // Retry up to 5 times
+  
+  await waitForCondition(async () => {
+    return await page.locator('.loaded').isVisible();
+  }, 10000); // Wait up to 10 seconds
+});
+```
+
+## Best Practices
+
+### 1. Test Independence
+
+**Each test must be completely independent:**
+
+```typescript
+test('independent test', async ({ page }) => {
+  // Clear database if needed
+  const testDb = getTestDb();
+  await testDb.clear();
+  
+  // Complete setup for this test
+  await page.goto('/login');
+  
+  // Test logic
+});
+```
+
+### 2. Semantic Selectors
+
+**Priority order:**
+
+```typescript
+// 1. Best: Semantic selectors
+page.locator('[role="button"]')
+page.locator('button:has-text("Submit")')
+
+// 2. Good: Test IDs
+page.locator('[data-testid="login-form"]')
+
+// 3. OK: Class/ID
+page.locator('.submit-button')
+
+// 4. Avoid: Complex XPath
+page.locator('//div[@class="form"]//button[1]')
+```
+
+### 3. Explicit Waits
+
+**Always wait for elements:**
+
+```typescript
+// ✅ Good - explicit wait
+await expect(page.locator('text=Success')).toBeVisible();
+
+// ❌ Bad - no wait
+const text = await page.textContent('.message');
+```
+
+### 4. Avoid Timing-Based Waits
+
+```typescript
+// ❌ Don't rely on timing
+await new Promise(resolve => setTimeout(resolve, 1000));
+
+// ✅ Wait for actual state changes
+await expect(page.locator('text=Loaded')).toBeVisible();
+await page.waitForURL('/dashboard');
+```
+
+### 5. Test Naming
+
+**Use descriptive `should...` pattern:**
+
+```typescript
+// ✅ Good
+test('should login with valid credentials', async ({ page }) => {});
+
+// ❌ Bad
+test('login test', async ({ page }) => {});
+```
+
+## Running Tests
+
+### Commands
+
+```bash
+# Run all tests
+yarn test:e2e
+
+# Run specific test file
+yarn test:e2e tests/smoke.test.ts
+
+# Run in headed mode (browser visible)
+yarn test:e2e:headed
+
+# Debug mode (step-by-step)
+yarn test:e2e:debug
+
+# UI mode (interactive)
+yarn test:e2e:ui
+
+# View HTML report
+yarn test:e2e:report
+```
+
+### CI/CD
+
+**Tests run automatically:**
+- GitHub Actions: `.github/workflows/e2e-tests.yml`
+- GitLab CI: `.gitlab-ci.yml`
+
+**Both support:**
+- Native runner (Playwright installed)
+- Docker runner (containerized)
+
+## Common Issues and Solutions
+
+### Issue: "test.describe() error"
+
+**Problem**: Using `test.describe()` blocks causes Playwright errors.
+
+**Solution**: Use individual `test()` calls instead:
+
+```typescript
+// ❌ Wrong
+test.describe('Feature', () => {
+  test('should do X', async ({ page }) => {});
+});
+
+// ✅ Correct
+test('should do X', async ({ page }) => {});
+test('should do Y', async ({ page }) => {});
+```
+
+### Issue: Database not connected
+
+**Problem**: `clearAllCollections()` fails with "Database is not connected".
+
+**Solution**: Ensure database is cleared via helper:
+
+```typescript
+import { getTestDb } from '../helpers';
+
+test('test', async () => {
+  const testDb = getTestDb();
+  await testDb.clear(); // Uses connected database
+});
+```
+
+### Issue: Port already in use
+
+**Problem**: Port 8000 or 3000 already in use.
+
+**Solution**: 
+1. Kill existing processes: `lsof -ti:8000 | xargs kill -9`
+2. Or change ports in `.env.test`:
+   ```
+   E2E_API_PORT=8001
+   E2E_APP_PORT=3001
+   ```
+
+### Issue: Test timeout
+
+**Solution**: Increase timeout in test:
+
+```typescript
+test('slow test', async ({ page }) => {
+  test.setTimeout(60000); // 60 seconds
+  // Test logic
+});
+```
+
+### Issue: Flaky tests
+
+**Solutions**:
+- Use explicit waits instead of timeouts
+- Wait for actual state changes, not arbitrary delays
+- Use `waitForURL()` for navigation
+- Check selectors are stable
+
+## File References
+
+- **Test Helpers**: [e2e/helpers.ts](mdc:e2e/helpers.ts)
+- **Server Manager**: [e2e/utils/serverManager.ts](mdc:e2e/utils/serverManager.ts)
+- **Playwright Config**: [e2e/playwright.config.ts](mdc:e2e/playwright.config.ts)
+- **Global Setup**: [e2e/global-setup.ts](mdc:e2e/global-setup.ts)
+- **Test DB Helper**: [e2e/utils/testDbHelper.ts](mdc:e2e/utils/testDbHelper.ts)
+- **Factories**: [e2e/utils/factories.ts](mdc:e2e/utils/factories.ts)
+- **API Helpers**: [e2e/utils/apiHelpers.ts](mdc:e2e/utils/apiHelpers.ts)
+
+## Key Takeaways
+
+1. **ALWAYS** use `import { test, expect } from '@playwright/test'`
+2. **NEVER** use `test.describe()` blocks
+3. **ALWAYS** use `getServers()` and `getTestDb()` helpers for infrastructure access
+4. **ALWAYS** clear database at test start if needed: `await getTestDb().clear()`
+5. Servers are managed automatically in global-setup/teardown
+6. Database is MongoDB Memory Server (in-memory, isolated)
+7. Tests run in parallel by default (4 workers locally, 2 in CI)
+8. Use semantic selectors and explicit waits
+9. Each test must be completely independent
