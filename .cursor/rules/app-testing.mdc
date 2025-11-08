@@ -55,24 +55,14 @@ yarn test -t "^Notifier renders"
 yarn test -t "MyComponent"
 ```
 
-#### 3. Watch режим (перезапуск при изменении файлов)
-
-```bash
-# Watch режим для конкретного файла
-yarn test:watch Notifier.test.tsx
-
-# Watch режим с фильтром по имени
-yarn test:watch -t "Notifier"
-```
-
-#### 4. Запуск только измененных тестов
+#### 3. Запуск только измененных тестов
 
 ```bash
 # Запуск только тестов для измененных файлов (требует Git)
 yarn test --onlyChanged
 ```
 
-#### 5. Режим отладки (пошаговое выполнение)
+#### 4. Режим отладки (пошаговое выполнение)
 
 ```bash
 # Отладка в Chrome DevTools
@@ -84,10 +74,8 @@ node --inspect-brk ./node_modules/.bin/jest --runInBand components/common/__test
 | Сценарий | Команда | Когда использовать |
 |----------|---------|---------------------|
 | Разработка компонента | `yarn test MyComponent.test.tsx` | Работа над React компонентом |
-| Отладка одного теста | `yarn test:watch -t "MyComponent"` | Тест падает, нужно исправить логику |
 | Полная проверка перед коммитом | `yarn test` | Перед `git commit` |
 | Проверка покрытия модуля | `yarn test --coverage MyComponent.test.tsx` | Проверить покрытие нового кода |
-| Локальная разработка | `yarn test:watch -t "MyComponent"` | Итеративная разработка в реальном времени |
 | Финальная проверка покрытия | `yarn test:coverage` | Перед закрытием subtasks (≥ 80%) |
 
 ### Полезные флаги для комбинации:
@@ -103,13 +91,13 @@ yarn test --bail Notifier.test.tsx
 yarn test --runInBand components/common
 
 # Комбинировать несколько флагов
-yarn test Notifier.test.tsx --watch --verbose --bail
+yarn test Notifier.test.tsx --verbose --bail
 ```
 
 ### ⚡ Быстрый рабочий процесс отладки:
 
 1. Написать тест → запустить его: `yarn test MyComponent.test.tsx`
-2. Тест падает → исправить код и использовать watch режим: `yarn test:watch -t "MyComponent"`
+2. Тест падает → исправить код и запустить тест снова
 3. Все тесты файла проходят → запустить полный набор: `yarn test`
 4. Перед закрытием subtasks → финальная проверка: `yarn test:coverage`
 
@@ -409,9 +397,6 @@ screen.getByTestId('submit-button'); // только если нет други�
 ```bash
 # Запуск всех тестов
 yarn test
-
-# Запуск в watch режиме
-yarn test:watch
 
 # Запуск с покрытием кода
 yarn test:coverage
