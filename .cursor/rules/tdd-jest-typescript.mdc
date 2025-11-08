@@ -1,0 +1,551 @@
+---
+description: Strict TDD rule with Jest + TypeScript + Playwright for monorepo. Any new/changed code is accompanied first by failing tests, then a minimal implementation and refactoring.
+globs: *.ts,*.tsx,api/**/*.ts,app/**/*.tsx,e2e/**/*.ts,**/__tests__/**/*
+alwaysApply: true
+---
+
+## Rule: Always develop in TDD style (Jest + TypeScript + Playwright)
+
+This monorepo contains three testing environments:
+1. **API Server** (`api/`) - Jest unit tests with MongoDB Memory Server
+2. **App** (`app/`) - Jest unit tests with React Testing Library
+3. **E2E** (`e2e/`) - Playwright integration tests with MongoDB Memory Server
+
+- **Main cycle (Red → Green → Refactor)**
+  - First write a minimal failing test that reflects the required behavior (Red)
+  - Implement minimal code to make the test pass (Green)
+  - Refactor code and tests while keeping them green (Refactor)
+
+- **Coverage and quality control**
+  - **Required coverage**: no less than 80% for lines, functions, branches, and statements
+  - **Prohibition**: do not merge code without passing unit tests and meeting the coverage threshold
+  - The same test and lint scripts must run in CI locally and remotely
+  - **Every coverage run**: after coverage command all metrics (lines, functions, branches, statements) should be ≥ 80%
+  - **Before closing a subtask**: run coverage check and ensure all metrics are ≥ 80%. If any are < 80% — add tests/refactor and do not close the subtask
+
+- **Test structure and conventions**
+  - **API tests location**: `api/server/**/__tests__/**/*.test.ts` - next to the files being tested
+  - **App tests location**: `app/**/__tests__/**/*.test.tsx` - next to the components being tested
+  - **E2E tests location**: `e2e/tests/**/*.test.ts` - organized by feature
+  - **File names**: `*.test.ts` or `*.test.tsx` for unit tests, `*.spec.ts` for E2E tests
+  - **AAA pattern**: Arrange → Act → Assert is mandatory in test cases
+  - **Determinism**: unit tests must not access network/DB/time with side effects — use mocks/stubs/fake timers
+  - **Selective test execution**: при написании и отладке тестов следует запускать только те тесты, над которыми идет работа (использовать флаги `--testNamePattern`, `--testPathPattern` или запуск конкретного файла)
+
+### Selective Test Execution (Only run tests you're working on during debug)
+
+**Use these approaches during development to accelerate the debug cycle:**
+
+#### 1. Run specific test file (FASTEST APPROACH)
+
+**For API tests (cd api/):**
+```bash
+# Run only one test file
+yarn test server/utils/__tests__/slugify.test.ts
+
+# Shortened variant (works if path has unique characters)
+yarn test slugify.test.ts
+```
+
+**For App tests (cd app/):**
+```bash
+# Run only one test file
+yarn test components/common/__tests__/Notifier.test.tsx
+
+# Shortened variant
+yarn test Notifier.test.tsx
+```
+
+**For E2E tests (from root):**
+```bash
+# Run only one test file
+yarn test:e2e tests/smoke.test.ts
+
+# Run specific test suite
+yarn test:e2e tests/auth/
+```
+
+#### 2. Run tests by name (use `--testNamePattern` / `-t`)
+
+**For API/App tests:**
+```bash
+# Run tests with name containing "slugify"
+cd api && yarn test -t "slugify"
+
+# Run tests matching exact regex
+cd app && yarn test -t "^Notifier renders"
+
+# Run all tests in a describe block
+yarn test -t "MyComponent"
+```
+
+**For E2E tests:**
+```bash
+# Run tests with name containing "login"
+yarn test:e2e -g "login"
+```
+
+#### 3. Run tests by path (use `--testPathPattern`)
+
+**For API/App tests:**
+```bash
+# Run all tests in a specific folder
+cd api && yarn test --testPathPattern="utils"
+
+# Run tests from specific folder
+cd app && yarn test --testPathPattern="components/common"
+```
+
+#### 4. Watch mode (re-runs on file changes)
+
+**For API/App tests:**
+```bash
+# Run tests in watch mode for specific file
+cd api && yarn test --watch slugify.test.ts
+
+# Watch mode with test name filter
+cd app && yarn test:watch -t "Notifier"
+```
+
+**Note:** E2E tests don't have watch mode due to server startup overhead.
+
+#### 5. Run only changed tests (for CI/CD)
+```bash
+# Run only tests for changed files (requires Git)
+cd api && yarn test --onlyChanged
+
+# For app
+cd app && yarn test --onlyChanged
+```
+
+#### 6. Debug mode (for step-by-step execution)
+
+**For Jest tests:**
+```bash
+# Run tests in debug mode (opens Chrome DevTools)
+cd api
+node --inspect-brk ./node_modules/.bin/jest --runInBand server/utils/__tests__/slugify.test.ts
+```
+
+**For E2E tests:**
+```bash
+# Debug mode with Playwright UI
+yarn test:e2e:debug
+
+# Or run in headed mode to see browser
+yarn test:e2e:headed
+```
+
+**Recommended scenarios:**
+
+| Scenario | Command | When to use |
+|----------|---------|-------------|
+| API unit test development | `cd api && yarn test slugify.test.ts` | Working on API utility/model |
+| App component development | `cd app && yarn test Notifier.test.tsx` | Working on React component |
+| E2E smoke test | `yarn test:e2e tests/smoke.test.ts` | Quick E2E validation |
+| Single test debugging | `cd api && yarn test --watch -t "slugify"` | Test fails, need to fix logic |
+| Full check before commit | `cd api && yarn test && cd ../app && yarn test` | Before `git commit` |
+| Module coverage check | `cd api && yarn test --coverage slugify.test.ts` | Check coverage of new code |
+| Local development | `cd app && yarn test:watch -t "MyComponent"` | Iterative development in real time |
+| E2E full check | `yarn test:e2e` | Before closing feature (from root) |
+| Final coverage check | `cd api && yarn test --coverage` | Before closing subtask (≥ 80%) |
+
+**Useful flags for combining (API/App):**
+
+```bash
+# Show verbose output
+cd api && yarn test slugify.test.ts --verbose
+
+# Stop on first test failure
+cd app && yarn test --bail Notifier.test.tsx
+
+# Run tests sequentially, not in parallel (for debugging)
+cd api && yarn test --runInBand server/models
+
+# Combine multiple flags
+cd app && yarn test Notifier.test.tsx --watch --verbose --bail
+```
+
+**⚡ Quick debug workflow:**
+
+**For API tests:**
+1. Write test → run it: `cd api && yarn test MyModel.test.ts`
+2. Test fails → fix code and use watch mode: `yarn test MyModel.test.ts --watch`
+3. All file tests pass → run full suite: `yarn test`
+4. Before closing subtask → final check: `yarn test --coverage`
+
+**For App tests:**
+1. Write test → run it: `cd app && yarn test MyComponent.test.tsx`
+2. Test fails → fix code and use watch mode: `yarn test:watch -t "MyComponent"`
+3. All file tests pass → run full suite: `yarn test`
+4. Before closing subtask → final check: `yarn test:coverage`
+
+**For E2E tests:**
+1. Write test → run it: `yarn test:e2e tests/feature.test.ts`
+2. Test fails → debug with UI: `yarn test:e2e:debug`
+3. Need to see browser → headed mode: `yarn test:e2e:headed`
+4. Before closing feature → full E2E: `yarn test:e2e`
+
+- **Tools and configuration (by environment)**
+  - **API**: Jest with `ts-jest`, `node` environment, MongoDB Memory Server for database tests
+  - **App**: Jest with `ts-jest`, `jsdom` environment, React Testing Library, Material-UI component testing
+  - **E2E**: Playwright with TypeScript, MongoDB Memory Server, automated server lifecycle management
+
+- **Yarn scripts (by location)**
+  
+  **API tests (cd api/):**
+  - `yarn test` — run all API tests
+  - `yarn test --coverage` — with coverage report
+  
+  **App tests (cd app/):**
+  - `yarn test` — run all App tests once
+  - `yarn test:watch` — watch mode (reruns on changes)
+  - `yarn test:coverage` — with coverage report
+  
+  **E2E tests (from root):**
+  - `yarn test:e2e` — run all E2E tests (auto-starts/stops servers)
+  - `yarn test:e2e:headed` — run with visible browser
+  - `yarn test:e2e:debug` — run with Playwright UI debugger
+  - `yarn test:e2e:ui` — run with Playwright UI test runner
+  - `yarn test:e2e:report` — view HTML test report
+  - `yarn test:e2e:docker` — run in Docker container
+
+### ✅ Examples: test first, then implementation
+
+#### API Server Example (Node.js/Express)
+
+```typescript
+// api/server/utils/__tests__/slugify.test.ts
+import slugify from '../slugify';
+
+describe('slugify', () => {
+  test('converts string to URL-friendly slug', () => {
+    // Arrange
+    const input = 'Hello World!';
+    
+    // Act
+    const result = slugify(input);
+    
+    // Assert
+    expect(result).toBe('hello-world');
+  });
+
+  test('handles special characters', () => {
+    expect(slugify('C++ Programming')).toBe('c-programming');
+  });
+
+  test('removes multiple spaces', () => {
+    expect(slugify('Too   Many    Spaces')).toBe('too-many-spaces');
+  });
+});
+```
+
+```typescript
+// api/server/utils/slugify.ts
+const slugify = (text: string): string => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')    // Remove all non-word chars
+    .replace(/\-\-+/g, '-')      // Replace multiple - with single -
+    .replace(/^-+/, '')          // Trim - from start
+    .replace(/-+$/, '');         // Trim - from end
+};
+
+export default slugify;
+```
+
+#### App Component Example (React/Next.js)
+
+```typescript
+// app/components/common/__tests__/Notifier.test.tsx
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import Notifier from '../Notifier';
+
+describe('Notifier', () => {
+  test('renders success message', () => {
+    // Arrange
+    const message = { open: true, message: 'Success!', variant: 'success' };
+    
+    // Act
+    render(<Notifier message={message} />);
+    
+    // Assert
+    expect(screen.getByText('Success!')).toBeInTheDocument();
+  });
+
+  test('does not render when closed', () => {
+    const message = { open: false, message: 'Hidden', variant: 'info' };
+    const { container } = render(<Notifier message={message} />);
+    expect(container.firstChild).toBeNull();
+  });
+});
+```
+
+```tsx
+// app/components/common/Notifier.tsx
+import React from 'react';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+
+interface NotifierProps {
+  message: {
+    open: boolean;
+    message: string;
+    variant: 'success' | 'error' | 'warning' | 'info';
+  };
+}
+
+const Notifier: React.FC<NotifierProps> = ({ message }) => {
+  if (!message.open) return null;
+
+  return (
+    <Snackbar open={message.open} autoHideDuration={6000}>
+      <Alert severity={message.variant}>{message.message}</Alert>
+    </Snackbar>
+  );
+};
+
+export default Notifier;
+```
+
+#### E2E Test Example (Playwright)
+
+```typescript
+// e2e/tests/auth/login.test.ts
+import { test, expect } from '../../fixtures';
+
+test.describe('User Authentication', () => {
+  test('should display login page', async ({ page, servers }) => {
+    // Arrange & Act
+    await page.goto(`${servers.appUrl}/login`);
+    
+    // Assert
+    await expect(page.locator('h1')).toContainText('Log in');
+    await expect(page.locator('button:has-text("Log in with Google")')).toBeVisible();
+  });
+
+  test('should redirect to dashboard after login', async ({ page, servers, testDb }) => {
+    // Arrange
+    await testDb.clear();
+    
+    // Act
+    await page.goto(`${servers.appUrl}/login`);
+    // ... perform login actions
+    
+    // Assert
+    await expect(page).toHaveURL(/.*dashboard/);
+  });
+});
+```
+
+### ❌ Anti-patterns (not allowed)
+
+- **Network/DB calls in unit tests**: calls to external APIs/MongoDB without mocks (except E2E tests with MongoDB Memory Server)
+- **Unstable timing**: `setTimeout`, dependence on current time without `jest.useFakeTimers()`/time mocking
+- **Hidden logic in beforeEach**: complex Arrange parts hidden in hooks make tests hard to understand
+- **One test covering multiple scenarios**: split into separate cases
+- **Testing implementation details**: test user-visible behavior, not internal state (especially for React components)
+- **Not using React Testing Library queries**: use `screen.getByRole`, `getByText` instead of `querySelector`
+
+### Minimum requirements for new code
+
+**API Server:**
+- Any new public function/class/model in `api/server/**` must be accompanied by unit tests in `__tests__/` folder
+- Any bug must first be fixed with a regression test (red), then by an implementation
+- Mocks/stubs are mandatory for external boundaries: network, filesystem, time, process/ENV, Stripe, AWS, Google Auth
+- For database tests, use MongoDB Memory Server (see [api/TESTING.md](mdc:api/TESTING.md))
+- Try to avoid `any` types in both **code** and **tests**
+
+**App:**
+- Any new component/page in `app/**` must be accompanied by unit tests in `__tests__/` folder
+- Test user-visible behavior, not implementation details
+- Use React Testing Library queries (`screen.getByRole`, `getByText`) instead of `querySelector`
+- Mock Material-UI components if they cause test issues
+- Test accessibility (ARIA roles, labels) where applicable
+- Try to avoid `any` types in both **code** and **tests**
+
+**E2E:**
+- Critical user flows must have E2E tests (auth, team management, payments)
+- Use fixtures (`page`, `servers`, `testDb`) from `e2e/fixtures`
+- Tests must be independent and can run in parallel
+- Clean database between tests using `testDb.clear()`
+- See [e2e/README.md](mdc:e2e/README.md) for detailed guidelines
+
+### Jest setup (current configuration)
+
+**API Server (`api/jest.config.ts`):**
+```typescript
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  collectCoverageFrom: [
+    'server/**/*.ts',
+    '!server/**/*.d.ts',
+    '!server/**/__tests__/**'
+  ],
+  coverageThreshold: {
+    global: { branches: 80, functions: 80, lines: 80, statements: 80 }
+  }
+};
+```
+
+**App (`app/jest.config.js`):**
+```javascript
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jest-environment-jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testMatch: ['**/__tests__/**/*.test.tsx', '**/__tests__/**/*.test.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1'
+  },
+  collectCoverageFrom: [
+    'components/**/*.{ts,tsx}',
+    'lib/**/*.{ts,tsx}',
+    'pages/**/*.{ts,tsx}',
+    '!**/__tests__/**',
+    '!**/*.d.ts'
+  ],
+  coverageThreshold: {
+    global: { branches: 80, functions: 80, lines: 80, statements: 80 }
+  }
+};
+```
+
+**E2E (`e2e/playwright.config.ts`):**
+```typescript
+export default defineConfig({
+  testDir: './tests',
+  globalSetup: require.resolve('./global-setup'),
+  globalTeardown: require.resolve('./global-teardown'),
+  use: {
+    baseURL: process.env.E2E_APP_URL || 'http://localhost:3000',
+  },
+  workers: process.env.CI ? 2 : 4,
+});
+```
+
+### How to bring branch coverage to 80%+
+
+- **Cover all condition branches**: if/else, switch, guard clauses, early returns
+- **Negative scenarios**: validation errors, empty inputs, missing dependencies
+- **Edge values**: dates/time (e.g., 0/30/31/180/181 days), empty/min/max strings
+- **Flags/defaults**: test the impact of flags and defaults (e.g., `isPopular` true/false)
+- **Parameterization**: use `it.each` to cover alternatives
+
+```typescript
+// ✅ DO: cover both branches and boundaries
+it.each([{ d: 0 }, { d: 30 }, { d: 31 }, { d: 180 }, { d: 181 }])('freshness boundary $d', ({ d }) => {
+  const score = scorer.calculateRelevanceScore({ baseScore: 80, matchType: 'partial', updatedAt: daysAgo(d) } as any);
+  expect(score).toBeGreaterThanOrEqual(80);
+});
+
+// ❌ DON'T: only the "happy path" without alternatives
+```
+
+### Required checks before merge/subtask done
+
+**For API changes:**
+- `cd api && yarn test` — all tests must pass
+- `cd api && yarn test --coverage` — all coverage metrics ≥ 80%
+- If needed — add missing tests to raise branch coverage
+
+**For App changes:**
+- `cd app && yarn test` — all tests must pass
+- `cd app && yarn test:coverage` — all coverage metrics ≥ 80%
+- Verify accessibility where applicable
+
+**For E2E/Full-stack features:**
+- `cd api && yarn test && cd ../app && yarn test` — unit tests pass
+- `yarn test:e2e` — E2E tests pass (from root)
+- Critical user flows are tested end-to-end
+
+### Mocking tips
+
+**API Server:**
+- **Mongoose models** — use MongoDB Memory Server for real database tests (see [api/TESTING.md](mdc:api/TESTING.md))
+- **HTTP clients** (e.g., `axios`, `request`) — `jest.mock('axios')`, assert input parameters and returned data
+- **External APIs** (Stripe, AWS S3, AWS SES, Google OAuth) — mock the entire client and error scenarios
+- **Socket.IO** — mock socket connections and events
+- **Time** — `jest.useFakeTimers()` and/or override `Date.now`
+- **Process/ENV** — `process.env.VAR_NAME = 'test-value'` in test setup
+
+**App:**
+- **Next.js Router** — mock `useRouter` from `next/router`
+- **Material-UI components** — mock specific components if they cause test issues
+- **API calls** — mock `fetch` or use MSW (Mock Service Worker)
+- **MobX stores** — create test store instances with known state
+- **Session/Auth** — mock `withAuth` HOC or provide test user context
+
+**E2E:**
+- **Don't mock!** — E2E tests should use real implementations
+- **Database** — MongoDB Memory Server is automatically configured
+- **External services** — use test API keys or mock at server level (not in tests)
+- **Fixtures** — use `testDb` fixture to seed/clear data between tests
+
+### Database testing with MongoDB Memory Server
+
+**API Server:**
+```typescript
+// api/server/models/__tests__/User.test.ts
+import { setupTestDb, teardownTestDb } from '../../utils/__tests__/testDbHelper';
+import User from '../User';
+
+describe('User Model', () => {
+  beforeAll(async () => {
+    await setupTestDb();
+  });
+
+  afterAll(async () => {
+    await teardownTestDb();
+  });
+
+  test('creates user with valid data', async () => {
+    const user = await User.create({
+      email: 'test@example.com',
+      displayName: 'Test User',
+    });
+    
+    expect(user.email).toBe('test@example.com');
+    expect(user.slug).toBeTruthy();
+  });
+});
+```
+
+**E2E Tests:**
+```typescript
+// e2e/tests/teams.test.ts
+import { test, expect } from '../fixtures';
+
+test('create team flow', async ({ page, servers, testDb }) => {
+  // Clear database before test
+  await testDb.clear();
+  
+  // Test uses real MongoDB Memory Server instance
+  await page.goto(`${servers.appUrl}/teams/new`);
+  // ... test logic
+});
+```
+
+### Maintaining the rule up to date
+
+- **Update the rule** if:
+  - New common testing patterns appear in 3+ files
+  - The project adds new external services/SDKs that require standard mocking (AWS, Stripe, etc.)
+  - Quality thresholds increase (coverage, run time) or new CI checks appear
+  - New testing tools/libraries are introduced (e.g., MSW, Storybook)
+  - E2E test patterns evolve (new fixtures, helpers, utilities)
+
+### References
+
+- **API Testing**: [api/TESTING.md](mdc:api/TESTING.md)
+- **App Testing**: [app/TESTING.md](mdc:app/TESTING.md)
+- **E2E Testing**: [e2e/README.md](mdc:e2e/README.md)
+- **E2E Contributing**: [e2e/CONTRIBUTING.md](mdc:e2e/CONTRIBUTING.md)
+- **Testing Rules**: [.cursor/rules/api-testing.mdc](mdc:.cursor/rules/api-testing.mdc), [.cursor/rules/app-testing.mdc](mdc:.cursor/rules/app-testing.mdc), [.cursor/rules/e2e-testing.mdc](mdc:.cursor/rules/e2e-testing.mdc)
