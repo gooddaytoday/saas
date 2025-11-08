@@ -31,6 +31,6 @@
     "wait-on": "^7.2.0"
   },
   "lint-staged": {
-    "**/*": "secretlint"
+    "**/*": ["secretlint"]
   }
 }
