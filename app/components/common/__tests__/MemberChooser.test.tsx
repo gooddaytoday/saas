@@ -4,6 +4,16 @@ import '@testing-library/jest-dom';
 import MemberChooser from '../MemberChooser';
 import { User } from '../../../lib/store/user';
 
+// Mock User class for testing
+jest.mock('../../../lib/store/user', () => ({
+  User: jest.fn().mockImplementation((params) => ({
+    ...params,
+    updateProfile: jest.fn(),
+    toggleTheme: jest.fn(),
+    getListOfInvoices: jest.fn(),
+  })),
+}));
+
 // Mock Material-UI Autocomplete component
 jest.mock('@mui/material/Autocomplete', () => {
   return function MockAutocomplete({ options, value, renderInput, getOptionLabel, ...props }: any) {
@@ -58,7 +68,7 @@ jest.mock('@mui/material/TextField', () => {
 describe('MemberChooser', () => {
   // Mock data
   const mockUsers: User[] = [
-    {
+    new User({
       _id: 'user1',
       slug: 'user1',
       email: 'user1@example.com',
@@ -71,8 +81,8 @@ describe('MemberChooser', () => {
       hasCardInformation: false,
       stripeListOfInvoices: null,
       store: null,
-    } as any,
-    {
+    }),
+    new User({
       _id: 'user2',
       slug: 'user2',
       email: 'user2@example.com',
@@ -85,8 +95,8 @@ describe('MemberChooser', () => {
       hasCardInformation: false,
       stripeListOfInvoices: null,
       store: null,
-    } as any,
-    {
+    }),
+    new User({
       _id: 'user3',
       slug: 'user3',
       email: 'user3@example.com',
@@ -99,7 +109,7 @@ describe('MemberChooser', () => {
       hasCardInformation: false,
       stripeListOfInvoices: null,
       store: null,
-    } as any,
+    }),
   ];
 
   const mockOnChange = jest.fn();
@@ -324,11 +334,21 @@ describe('MemberChooser', () => {
   describe('Edge cases', () => {
     test('handles users with null displayName gracefully', () => {
       // Arrange
-      const usersWithNullDisplayName = [
-        {
-          ...mockUsers[0],
+      const usersWithNullDisplayName: User[] = [
+        new User({
+          _id: 'user1',
+          slug: 'user1',
+          email: 'user1@example.com',
           displayName: null,
-        },
+          avatarUrl: null,
+          isSignedupViaGoogle: false,
+          darkTheme: false,
+          defaultTeamSlug: 'team1',
+          stripeCard: null,
+          hasCardInformation: false,
+          stripeListOfInvoices: null,
+          store: null,
+        }),
       ];
 
       // Act
@@ -341,11 +361,21 @@ describe('MemberChooser', () => {
 
     test('handles users with empty string displayName', () => {
       // Arrange
-      const usersWithEmptyDisplayName = [
-        {
-          ...mockUsers[0],
+      const usersWithEmptyDisplayName: User[] = [
+        new User({
+          _id: 'user1',
+          slug: 'user1',
+          email: 'user1@example.com',
           displayName: '',
-        },
+          avatarUrl: null,
+          isSignedupViaGoogle: false,
+          darkTheme: false,
+          defaultTeamSlug: 'team1',
+          stripeCard: null,
+          hasCardInformation: false,
+          stripeListOfInvoices: null,
+          store: null,
+        }),
       ];
 
       // Act
@@ -358,12 +388,21 @@ describe('MemberChooser', () => {
 
     test('handles users with null email', () => {
       // Arrange
-      const usersWithNullEmail = [
-        {
-          ...mockUsers[0],
+      const usersWithNullEmail: User[] = [
+        new User({
+          _id: 'user1',
+          slug: 'user1',
           email: null,
           displayName: 'User Name',
-        },
+          avatarUrl: null,
+          isSignedupViaGoogle: false,
+          darkTheme: false,
+          defaultTeamSlug: 'team1',
+          stripeCard: null,
+          hasCardInformation: false,
+          stripeListOfInvoices: null,
+          store: null,
+        }),
       ];
 
       // Act
