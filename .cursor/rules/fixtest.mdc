@@ -1,0 +1,150 @@
+---
+alwaysApply: false
+---
+
+
+**Goal.** Fix failing tests with maximum responsibility: distinguish outdated/irrelevant tests from regressions in production code, eliminate the root cause, not "paint the grass green".
+
+## Strict Rules (follow strictly)
+
+1. **Never** fix a test just for a green status if the failure is caused by a bug in the code. First, assess whether the current behavior matches the specification/expected contract. If not — **you need to fix the code**, then adjust/add tests for the correct behavior.
+2. If the behavior **changed intentionally** (new logic/contract), tests are considered **outdated** — update them for the new expected result.
+3. If the failure is **non-deterministic (flaky)** — first eliminate flakiness (determinize test/code), then return to points 1–2.
+4. **Snapshots** (if any): update **only** when the change is intentional and manually verified; automatic mass "-u" without review is prohibited.
+5. If the reason is unclear — use **git history**: working `diff` (if any), `git log -p`, `git blame`, if necessary — `git bisect` to localize the commit that broke the behavior.
+6. Accompany any fix with **a brief report of the reason** and **meaningful commit message/PR description**. For bug fixes — add/clarify a regression test.
+
+## Algorithm (decision tree)
+
+1. **Gather signals:**
+
+* Run tests locally with project commands:
+  * **E2E tests**: `yarn test:e2e` (full end-to-end), `yarn test:e2e:headed` (with browser), `yarn test:e2e:debug` (step-by-step)
+  * **API tests**: `cd api && yarn test`, `cd api && yarn test --coverage`
+  * **App tests**: `cd app && yarn test`, `cd app && yarn test:coverage`
+  * **Specific test**: `yarn test:e2e tests/specific.test.ts`, `cd api && yarn test slugify.test.ts`, `cd app && yarn test Notifier.test.tsx`
+* Record the list of failing tests, stacks, differences `expected vs actual`.
+* Run problematic tests **N times (>=5)** to distinguish stable failure from flakiness. If unstable — mark as flaky and go to block 3.
+
+1. **Stable failure → decide: outdated test or bug in code?**
+
+* Compare the failure with **recent changes**:
+  * If there's a local working diff — check if the tested areas are affected.
+  * If no local edits — study the history of recent commits for the module/file.
+* **Signs of outdated test:** documented change in requirements/contract; refactoring without changing external behavior, but test "clung" to implementation details; conscious fix of UI/format/content snapshot. → **Update the test** (and/or snapshot), preserving verification of user/public behavior, not internal details.
+* **Signs of regression in code:** specification/contract violated; rollback to "good" commit passes test; `git bisect` points to specific change not accompanied by updated specification. → **Fix the code**, then add/clarify test if necessary.
+
+3. **Flaky failure (non-determinism) → stabilize:**
+
+* Eliminate flakiness sources: races/concurrency, timer waits, network/IO dependencies, uninitialized data, randomness without seeding, execution order, timezone/locale, dependency on CI/CPU counters, etc.
+* Introduce explicit waits/synchronization, fix **seed**, isolate environment, mock external services, make test idempotent. After stabilization, return to block 2.
+
+4. **If the reason is still unclear:**
+
+* Review `git diff` of working tree.
+* Study `git log -p -- <files>` and `git blame` on changed lines.
+* Run `git bisect` between known "good" and current "bad" state to localize the culprit commit.
+* Formulate a hypothesis, confirm it with minimal repro/additional assertion, then apply step 2.
+
+5. **Finalization:**
+
+* Run the entire test suite for affected module:
+  * **E2E**: `yarn test:e2e` (full suite), `yarn test:e2e:report` (view HTML report)
+  * **API**: `cd api && yarn test --coverage` (must achieve ≥80% coverage)
+  * **App**: `cd app && yarn test:coverage` (must achieve ≥80% coverage)
+* If possible, run quick **mutation testing** on modules affected by changes (to ensure tests actually catch errors).
+* Prepare clean patch and report.
+
+## Test Fix Tactics (if test is truly outdated)
+
+* Test **behavior/contracts**, not implementation details: verify inputs/outputs/side effects, not private state/calls to internal functions.
+* Update snapshots precisely and meaningfully; avoid giant/noisy snapshots; consider inline-snapshots for small cases.
+* Update fixtures/data only if business logic changed, not "for beauty".
+
+### Specific Rules by Test Type
+
+#### API Tests (Jest + MongoDB Memory Server)
+* **Coverage requirement**: Must maintain ≥80% across lines, functions, branches, statements
+* **Database isolation**: Use MongoDB Memory Server; no external DB setup required
+* **Mock external services**: Stripe, AWS S3/SES, Google Auth, file system operations
+* **Before merge**: `cd api && yarn test --coverage` must pass with ≥80% coverage
+
+#### App Tests (Jest + React Testing Library)
+* **Coverage requirement**: Must maintain ≥80% across lines, functions, branches, statements
+* **Component testing**: Use semantic selectors (`getByRole`, `getByLabelText`), avoid `querySelector`
+* **Mock dependencies**: Material-UI components, Next.js router, MobX stores
+* **Before merge**: `cd app && yarn test:coverage` must pass with ≥80% coverage
+
+#### E2E Tests (Playwright + MongoDB Memory Server)
+* **Full-stack integration**: Tests API + App servers with automatic lifecycle management
+* **Database isolation**: Each test gets clean DB via fixtures (`testDb.clear()`)
+* **Server management**: Automatic startup on ports 8000 (API) / 3000 (App)
+* **Parallel execution**: 4 workers locally, 2 in CI with complete isolation
+* **Debug options**: `yarn test:e2e:debug`, `yarn test:e2e:ui`, `yarn test:e2e:headed`
+* **Before merge**: `yarn test:e2e` must pass (CI runs automatically)
+
+## Code Fix Tactics (if bug is discovered)
+
+* Fix logic where contract is violated; add/clarify regression test that **fails before fix and passes after**.
+* Avoid "fake" fix patterns: meaningless `sleep`, excessive retries, weakened asserts, removal of important checks.
+
+## Result Format (mandatory)
+
+1. **Brief diagnosis:** *outdated test* / *code regression* / *flaky* (+ why).
+2. **What changed:** list of files, key fragments, rationale.
+3. **How to reproduce initial failure and verify fix.**
+4. **Risks/limitations:** what else to check manually/on stage.
+5. **Commit message / PR template** in Conventional Commits style:
+
+   * `fix(module): correct XYZ; add regression test for ABC (closes #123)`
+   * `test(module): update snapshots for intentional UI change; narrow scope`
+
+## Forbidden
+
+* Change tests to "adapt" to obvious bug.
+* Mass update snapshots without manual diff review.
+* Delete checks that caught real defects without equivalent validation replacement.
+* Leave flakiness "for later".
+* **Merge code with test coverage <80%** for API/App modules (check `coverage/lcov-report/index.html`).
+* **Skip E2E tests** - they run automatically in CI/CD and must pass before merge.
+* **Break existing contracts/behavior** without updating dependent tests.
+* **Use `test.describe()` blocks in E2E tests** - causes Playwright errors, use individual `test()` calls.
+
+---
+
+### Project-Specific Notes
+
+* **Flaky tests**: Google regularly encounters flaky results; reasons — competition, non-determinism, environment dependency, etc. Recommended to eliminate flakiness sources, otherwise trust in tests is undermined.
+* **`git bisect`**: standard way to find regression-introducing commit with binary search; start with known "bad" and "good" states.
+* **When to change test vs code**: change test correctly if requirements changed, check became obsolete or test overly dependent on implementation; otherwise — fix code. Avoid tests checking implementation details.
+* **Snapshots**: update only for intentional changes after diff review; for Jest — `-u` flag, store snapshots in VCS.
+* **Regression bug fix must include test** (so it doesn't return).
+* **Mutation testing** helps verify tests actually catch errors (not "dummies").
+
+### Related Rules & Documentation
+
+* **[.cursor/rules/api-testing.mdc](mdc:.cursor/rules/api-testing.mdc)** - Complete API testing guidelines with Jest patterns
+* **[.cursor/rules/app-testing.mdc](mdc:.cursor/rules/app-testing.mdc)** - Frontend testing with React Testing Library
+* **[.cursor/rules/e2e-testing.mdc](mdc:.cursor/rules/e2e-testing.mdc)** - E2E testing with Playwright architecture
+* **[api/TESTING.md](mdc:api/TESTING.md)** - API testing setup and commands
+* **[app/TESTING.md](mdc:app/TESTING.md)** - Frontend testing setup and commands
+* **[e2e/README.md](mdc:e2e/README.md)** - E2E testing infrastructure and troubleshooting
+
+### Quick Commands Reference
+
+**API Tests:**
+- Run: `cd api && yarn test`
+- Coverage: `cd api && yarn test --coverage`
+- Specific: `cd api && yarn test slugify.test.ts`
+
+**App Tests:**
+- Run: `cd app && yarn test`
+- Coverage: `cd app && yarn test:coverage`
+- Specific: `cd app && yarn test Notifier.test.tsx`
+
+**E2E Tests:**
+- Run: `yarn test:e2e`
+- Headed: `yarn test:e2e:headed`
+- Debug: `yarn test:e2e:debug`
+- UI: `yarn test:e2e:ui`
+- Report: `yarn test:e2e:report`
