@@ -1,12 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import Confirmer, { openConfirmDialogExternal } from '../Confirmer';
 
 // Mock Material-UI Dialog components to avoid styling issues in tests
 jest.mock('@mui/material/Dialog', () => {
-  return function MockDialog({ open, children, onClose, ...props }: any) {
+  return function MockDialog({ open, children, ...props }: any) {
     return (
       <div data-testid="dialog" data-open={open} {...props}>
         {open && children}
@@ -17,25 +17,41 @@ jest.mock('@mui/material/Dialog', () => {
 
 jest.mock('@mui/material/DialogTitle', () => {
   return function MockDialogTitle({ children, ...props }: any) {
-    return <div data-testid="dialog-title" {...props}>{children}</div>;
+    return (
+      <div data-testid="dialog-title" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/DialogContent', () => {
   return function MockDialogContent({ children, ...props }: any) {
-    return <div data-testid="dialog-content" {...props}>{children}</div>;
+    return (
+      <div data-testid="dialog-content" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/DialogContentText', () => {
   return function MockDialogContentText({ children, ...props }: any) {
-    return <div data-testid="dialog-content-text" {...props}>{children}</div>;
+    return (
+      <div data-testid="dialog-content-text" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/DialogActions', () => {
   return function MockDialogActions({ children, ...props }: any) {
-    return <div data-testid="dialog-actions" {...props}>{children}</div>;
+    return (
+      <div data-testid="dialog-actions" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
@@ -103,7 +119,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Custom Title',
           message: 'Custom Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -121,7 +137,7 @@ describe('Confirmer', () => {
       act(() => {
         confirmerRef.current.openConfirmDialog({
           message: 'Test Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -137,7 +153,7 @@ describe('Confirmer', () => {
       act(() => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test Title',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -156,7 +172,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -174,7 +190,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -194,7 +210,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -215,7 +231,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: mockOnAnswer
+          onAnswer: mockOnAnswer,
         });
       });
 
@@ -237,7 +253,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: mockOnAnswer
+          onAnswer: mockOnAnswer,
         });
       });
 
@@ -261,7 +277,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'First Dialog',
           message: 'First Message',
-          onAnswer: mockOnAnswer1
+          onAnswer: mockOnAnswer1,
         });
       });
 
@@ -281,7 +297,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Second Dialog',
           message: 'Second Message',
-          onAnswer: mockOnAnswer2
+          onAnswer: mockOnAnswer2,
         });
       });
 
@@ -311,7 +327,7 @@ describe('Confirmer', () => {
         openConfirmDialogExternal({
           title: 'External Title',
           message: 'External Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -331,7 +347,7 @@ describe('Confirmer', () => {
         openConfirmDialogExternal({
           title: 'Test',
           message: 'Message',
-          onAnswer: mockCallback
+          onAnswer: mockCallback,
         });
       });
 
@@ -352,7 +368,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: null
+          onAnswer: null,
         });
       });
 
@@ -375,7 +391,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test',
           message: 'Message',
-          onAnswer: undefined
+          onAnswer: undefined,
         });
       });
 
@@ -398,7 +414,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: '',
           message: '',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -418,7 +434,7 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test Title',
           message: 'Test Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
@@ -437,13 +453,16 @@ describe('Confirmer', () => {
         confirmerRef.current.openConfirmDialog({
           title: 'Test Title',
           message: 'Test Message',
-          onAnswer: jest.fn()
+          onAnswer: jest.fn(),
         });
       });
 
       // Assert
       expect(screen.getByTestId('dialog-title')).toHaveAttribute('id', 'alert-dialog-title');
-      expect(screen.getByTestId('dialog-content-text')).toHaveAttribute('id', 'alert-dialog-description');
+      expect(screen.getByTestId('dialog-content-text')).toHaveAttribute(
+        'id',
+        'alert-dialog-description',
+      );
     });
   });
 });
