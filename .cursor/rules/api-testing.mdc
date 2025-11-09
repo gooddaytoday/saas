@@ -134,7 +134,7 @@ describe('API endpoints', () => {
 
 ### Coverage control and quality
 - **Mandatory coverage**: at least 80% for lines, functions, branches, and statements
-- **Prohibition**: Do not merge code without passing unit tests and achieving coverage threshold
+- **Prohibition**: Do not commit code without passing unit tests and achieving coverage threshold
 - **Each coverage run**: after running coverage, all metrics must be ≥ 80%
 - **Before closing subtask**: Run coverage check and ensure all metrics ≥ 80%. If any metric < 80% — add tests/refactor and do not close subtask
 
@@ -258,7 +258,7 @@ it.each([{ d: 0 }, { d: 30 }, { d: 31 }, { d: 180 }, { d: 181 }])('freshness bou
 - Don't make tests dependent on each other
 - Don't test implementation details
 - Don't write code without tests (except prototyping)
-- Don't merge code with coverage < 80%
+- Don't commit code with coverage < 80%
 
 ## **Commands for Running Tests**
 

@@ -5,112 +5,112 @@ globs: app/**/*.ts,app/**/*.tsx,app/**/*.test.ts,app/**/*.test.tsx,app/**/*.spec
 
 # Frontend Testing Guidelines
 
-Руководство по написанию тестов для Next.js приложения с использованием Jest и React Testing Library.
+Guide for writing tests for Next.js application using Jest and React Testing Library.
 
 ## **TDD Development Principles**
 
-### Основной цикл TDD (Red → Green → Refactor)
+### Main TDD Cycle (Red → Green → Refactor)
 
-- **Red**: Сначала напишите минимальный проваливающийся тест, отражающий требуемое поведение
-- **Green**: Реализуйте минимальный код, чтобы тест прошел
-- **Refactor**: Рефакторите код и тесты, сохраняя их зелеными
+- **Red**: First write a minimal failing test that reflects the required behavior
+- **Green**: Implement minimal code to make the test pass
+- **Refactor**: Refactor code and tests while keeping them green
 
-### Контроль покрытия и качества
+### Coverage Control and Quality
 
-- **Обязательное покрытие**: не менее 80% по линиям, функциям, веткам и операторам
-- **Запрет**: не сливать код без прохождения unit тестов и достижения порога покрытия
-- **Каждый запуск покрытия**: все метрики (lines, functions, branches, statements) должны быть ≥ 80%
-- **Перед закрытием subtasks**: запустить проверку покрытия и убедиться, что все метрики ≥ 80%. Если < 80% — добавить тесты/рефакторить и не закрывать subtask
+- **Required coverage**: at least 80% for lines, functions, branches, and statements
+- **Prohibition**: do not commit code without passing unit tests and reaching coverage threshold
+- **Every coverage run**: all metrics (lines, functions, branches, statements) must be ≥ 80%
+- **Before closing subtasks**: run coverage check and ensure all metrics ≥ 80%. If < 80% — add tests/refactor and do not close subtask
 
-### Структура тестов и соглашения
+### Test Structure and Conventions
 
-- **Расположение тестов**: `app/**/__tests__/**/*.test.tsx` - рядом с тестируемыми компонентами
-- **Именование файлов**: `*.test.tsx` для React компонентов
-- **AAA паттерн**: Arrange → Act → Assert обязателен в тестовых случаях
-- **Детерминированность**: unit тесты не должны обращаться к сети/DB/времени с побочными эффектами — используйте моки/стабы/fake timers
-- **Выборочный запуск тестов**: при написании и отладке тестов запускайте только те тесты, над которыми идет работа
+- **Test location**: `app/**/__tests__/**/*.test.tsx` - next to the components being tested
+- **File naming**: `*.test.tsx` for React components
+- **AAA pattern**: Arrange → Act → Assert is mandatory in test cases
+- **Determinism**: unit tests should not access network/DB/time with side effects — use mocks/stubs/fake timers
+- **Selective test running**: when writing and debugging tests, run only the tests you're working on
 
-### Выборочный запуск тестов (только над теми, что разрабатываете)
+### Selective Test Running (Only Those You're Developing)
 
-#### 1. Запуск конкретного файла тестов (САМЫЙ БЫСТРЫЙ ПОДХОД)
+#### 1. Running a Specific Test File (FASTEST APPROACH)
 
 ```bash
-# Запуск только одного файла тестов
+# Running only one test file
 yarn test components/common/__tests__/Notifier.test.tsx
 
-# Сокращенный вариант
+# Shortened version
 yarn test Notifier.test.tsx
 ```
 
-#### 2. Запуск тестов по имени (используйте `--testNamePattern` / `-t`)
+#### 2. Running Tests by Name (Use `--testNamePattern` / `-t`)
 
 ```bash
-# Запуск тестов с именем содержащим "slugify"
+# Running tests with name containing "slugify"
 yarn test -t "slugify"
 
-# Запуск тестов по точному regex
+# Running tests by exact regex
 yarn test -t "^Notifier renders"
 
-# Запуск всех тестов в describe блоке
+# Running all tests in a describe block
 yarn test -t "MyComponent"
 ```
 
-#### 3. Запуск только измененных тестов
+#### 3. Running Only Changed Tests
 
 ```bash
-# Запуск только тестов для измененных файлов (требует Git)
+# Running only tests for changed files (requires Git)
 yarn test --onlyChanged
 ```
 
-#### 4. Режим отладки (пошаговое выполнение)
+#### 4. Debug Mode (Step-by-Step Execution)
 
 ```bash
-# Отладка в Chrome DevTools
+# Debugging in Chrome DevTools
 node --inspect-brk ./node_modules/.bin/jest --runInBand components/common/__tests__/Notifier.test.tsx
 ```
 
-### Рекомендуемые сценарии:
+### Recommended Scenarios:
 
-| Сценарий | Команда | Когда использовать |
-|----------|---------|---------------------|
-| Разработка компонента | `yarn test MyComponent.test.tsx` | Работа над React компонентом |
-| Полная проверка перед коммитом | `yarn test` | Перед `git commit` |
-| Проверка покрытия модуля | `yarn test --coverage MyComponent.test.tsx` | Проверить покрытие нового кода |
-| Финальная проверка покрытия | `yarn test:coverage` | Перед закрытием subtasks (≥ 80%) |
+| Scenario | Command | When to use |
+|----------|---------|-------------|
+| Component development | `yarn test MyComponent.test.tsx` | Working on React component |
+| Full check before commit | `yarn test` | Before `git commit` |
+| Module coverage check | `yarn test --coverage MyComponent.test.tsx` | Check coverage of new code |
+| Final coverage check | `yarn test:coverage` | Before closing subtasks (≥ 80%) |
 
-### Полезные флаги для комбинации:
+### Useful Flags for Combination:
 
 ```bash
-# Показать подробный вывод
+# Show detailed output
 yarn test Notifier.test.tsx --verbose
 
-# Остановить на первом падении теста
+# Stop on first test failure
 yarn test --bail Notifier.test.tsx
 
-# Запускать тесты последовательно, не параллельно (для отладки)
+# Run tests sequentially, not in parallel (for debugging)
 yarn test --runInBand components/common
 
-# Комбинировать несколько флагов
+# Combine multiple flags
 yarn test Notifier.test.tsx --verbose --bail
 ```
 
-### ⚡ Быстрый рабочий процесс отладки:
+### ⚡ Fast Debugging Workflow:
 
-1. Написать тест → запустить его: `yarn test MyComponent.test.tsx`
-2. Тест падает → исправить код и запустить тест снова
-3. Все тесты файла проходят → запустить полный набор: `yarn test`
-4. Перед закрытием subtasks → финальная проверка: `yarn test:coverage`
+1. Write test → run it: `yarn test MyComponent.test.tsx`
+2. Test fails → fix code and run test again
+3. All file tests pass → run full set: `yarn test`
+4. Before closing subtasks → final check: `yarn test:coverage`
 
-### Как достичь покрытия 80%+
+### How to Achieve 80%+ Coverage
 
-- **Покрыть все ветки условий**: if/else, switch, guard clauses, early returns
-- **Негативные сценарии**: ошибки валидации, пустые входы, отсутствующие зависимости
-- **Граничные значения**: пустые/мин/макс строки, различные пропсы
-- **Флаги/дефолты**: протестировать влияние флагов и дефолтов
-- **Параметризация**: использовать `it.each` для покрытия альтернатив
+- **Cover all condition branches**: if/else, switch, guard clauses, early returns
+- **Negative scenarios**: validation errors, empty inputs, missing dependencies
+- **Edge values**: empty/min/max strings, various props
+- **Flags/defaults**: test the influence of flags and defaults
+- **Parameterization**: use `it.each` for covering alternatives
 
 ```typescript
-// ✅ ДО: покрыть обе ветки и границы
+// ✅ DO: cover both branches and boundaries
 it.each([
   { variant: 'success' },
   { variant: 'error' },
@@ -121,39 +121,39 @@ it.each([
   expect(screen.getByText('Test')).toBeInTheDocument();
 });
 
-// ❌ НЕ: только "счастливый путь" без альтернатив
+// ❌ DON'T: only "happy path" without alternatives
 ```
 
-### Обязательные проверки перед слиянием
+### Mandatory Checks Before Merging
 
-**Для изменений в App:**
-- `yarn test` — все тесты должны проходить
-- `yarn test:coverage` — все метрики покрытия ≥ 80%
-- При необходимости — добавить недостающие тесты для повышения покрытия веток
-- Проверить accessibility где применимо
+**For App changes:**
+- `yarn test` — all tests must pass
+- `yarn test:coverage` — all coverage metrics ≥ 80%
+- If necessary — add missing tests to increase branch coverage
+- Check accessibility where applicable
 
-### Минимальные требования для нового кода
+### Minimum Requirements for New Code
 
-- **Любой новый компонент/страница в `app/**` должен сопровождаться unit тестами в папке `__tests__/`**
-- **Тестируйте пользовательское поведение, не детали реализации**
-- **Используйте запросы React Testing Library (`screen.getByRole`, `getByText`) вместо `querySelector`**
-- **Мокируйте Material-UI компоненты если они вызывают проблемы с тестами**
-- **Тестируйте accessibility (ARIA роли, лейблы) где применимо**
-- **Избегайте типов `any` как в коде, так и в тестах**
+- **Any new component/page in `app/**` must be accompanied by unit tests in the `__tests__/` folder**
+- **Test user behavior, not implementation details**
+- **Use React Testing Library queries (`screen.getByRole`, `getByText`) instead of `querySelector`**
+- **Mock Material-UI components if they cause test issues**
+- **Test accessibility (ARIA roles, labels) where applicable**
+- **Avoid `any` types in both code and tests**
 
-### Советы по мокингу
+### Mocking Tips
 
-- **Next.js Router** — мокируйте `useRouter` из `next/router`
-- **Material-UI компоненты** — мокируйте конкретные компоненты если они вызывают проблемы
-- **API вызовы** — мокируйте `fetch` или используйте MSW (Mock Service Worker)
-- **MobX stores** — создавайте тестовые экземпляры store с известным состоянием
-- **Session/Auth** — мокируйте `withAuth` HOC или предоставляйте тестовый контекст пользователя
+- **Next.js Router** — mock `useRouter` from `next/router`
+- **Material-UI components** — mock specific components if they cause issues
+- **API calls** — mock `fetch` or use MSW (Mock Service Worker)
+- **MobX stores** — create test store instances with known state
+- **Session/Auth** — mock `withAuth` HOC or provide test user context
 
-## **Структура тестов**
+## **Test Structure**
 
-- **Размещение тестов**: Создавайте тесты в папках `__tests__` рядом с тестируемыми файлами
-- **Именование**: Используйте суффикс `.test.tsx` для React компонентов и `.test.ts` для утилит
-- **Организация**: Группируйте связанные тесты в `describe` блоки
+- **Test placement**: Create tests in `__tests__` folders next to the files being tested
+- **Naming**: Use `.test.tsx` suffix for React components and `.test.ts` for utilities
+- **Organization**: Group related tests in `describe` blocks
 
 ```
 components/
@@ -167,7 +167,7 @@ lib/
     isMobile.test.ts
 ```
 
-## **Основные библиотеки для тестирования**
+## **Main Testing Libraries**
 
 ### React Testing Library
 ```typescript
@@ -175,7 +175,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 ```
 
-### Jest DOM матчеры
+### Jest DOM Matchers
 ```typescript
 expect(element).toBeInTheDocument();
 expect(element).toHaveAttribute('data-testid', 'button');
@@ -184,9 +184,9 @@ expect(element).toHaveClass('active');
 expect(element).toBeVisible();
 ```
 
-## **Паттерны тестирования React компонентов**
+## **React Component Testing Patterns**
 
-### Базовый тест компонента
+### Basic Component Test
 ```typescript
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -215,7 +215,7 @@ describe('MyComponent', () => {
 });
 ```
 
-### Тестирование с пропсами
+### Testing with Props
 ```typescript
 describe('ComponentWithProps', () => {
   test('renders with required props', () => {
@@ -233,7 +233,7 @@ describe('ComponentWithProps', () => {
 });
 ```
 
-### Тестирование асинхронных операций
+### Testing Asynchronous Operations
 ```typescript
 test('handles async data loading', async () => {
   render(<AsyncComponent />);
@@ -248,9 +248,9 @@ test('handles async data loading', async () => {
 });
 ```
 
-## **Тестирование пользовательских взаимодействий**
+## **Testing User Interactions**
 
-### User Events (рекомендуемый подход)
+### User Events (Recommended Approach)
 ```typescript
 import userEvent from '@testing-library/user-event';
 
@@ -265,7 +265,7 @@ test('user can type in input field', async () => {
 });
 ```
 
-### FireEvent (для простых случаев)
+### FireEvent (For Simple Cases)
 ```typescript
 test('button click changes state', () => {
   render(<ToggleButton />);
@@ -277,18 +277,18 @@ test('button click changes state', () => {
 });
 ```
 
-## **Мокирование модулей и функций**
+## **Mocking Modules and Functions**
 
-### Мокирование внешних библиотек
+### Mocking External Libraries
 ```typescript
-// Мокирование Material-UI компонентов
+// Mocking Material-UI components
 jest.mock('@mui/material/Button', () => {
   return function MockButton({ children, onClick, ...props }) {
     return <button onClick={onClick} {...props}>{children}</button>;
   };
 });
 
-// Мокирование Next.js router
+// Mocking Next.js router
 jest.mock('next/router', () => ({
   useRouter() {
     return {
@@ -301,7 +301,7 @@ jest.mock('next/router', () => ({
 }));
 ```
 
-### Мокирование функций
+### Mocking Functions
 ```typescript
 test('calls API on submit', async () => {
   const mockApiCall = jest.fn().mockResolvedValue({ success: true });
@@ -316,7 +316,7 @@ test('calls API on submit', async () => {
 });
 ```
 
-## **Тестирование утилитных функций**
+## **Testing Utility Functions**
 
 ```typescript
 import { myUtilFunction } from '../myUtilFunction';
@@ -334,7 +334,7 @@ describe('myUtilFunction', () => {
 });
 ```
 
-## **Снапшот тестирование**
+## **Snapshot Testing**
 
 ```typescript
 test('component renders consistently', () => {
@@ -342,72 +342,72 @@ test('component renders consistently', () => {
   expect(container.firstChild).toMatchSnapshot();
 });
 
-// Обновление снапшотов
+// Update snapshots
 // yarn test --updateSnapshot
 ```
 
 ## **Best Practices**
 
 ### ✅ DO:
-- **Тестируйте поведение, не реализацию** - фокусируйтесь на том, что видит пользователь
-- **Используйте семантические запросы** - `getByRole`, `getByLabelText`, `getByText`
-- **Одно утверждение на тест** - каждый тест должен проверять одно поведение
-- **Описательные имена тестов** - четко описывайте что тестируете
-- **Группировка тестов** - используйте `describe` для логической группировки
-- **Очистка после тестов** - используйте `afterEach` для сброса состояния
-- **Мокируйте внешние зависимости** - изолируйте компоненты от внешних сервисов
+- **Test behavior, not implementation** - focus on what the user sees
+- **Use semantic queries** - `getByRole`, `getByLabelText`, `getByText`
+- **One assertion per test** - each test should verify one behavior
+- **Descriptive test names** - clearly describe what you're testing
+- **Test grouping** - use `describe` for logical grouping
+- **Cleanup after tests** - use `afterEach` to reset state
+- **Mock external dependencies** - isolate components from external services
 
 ### ❌ DON'T:
-- Не тестируйте детали реализации (internal state, private methods)
-- Не полагайтесь на конкретную структуру DOM
-- Не используйте `container.querySelector` вместо семантических запросов
-- Не делайте тесты зависимыми друг от друга
-- Не тестируйте библиотечный код (React, Material-UI)
-- **Не пишите нестабильные по времени тесты**: `setTimeout`, зависимость от текущего времени без `jest.useFakeTimers()`/time mocking
-- **Не прячьте логику в beforeEach**: сложные Arrange части в хуках делают тесты непонятными
-- **Не пишите один тест на несколько сценариев**: разделяйте на отдельные случаи
-- **Не тестируйте детали реализации**: тестируйте пользовательское видимое поведение, не внутреннее состояние (особенно для React компонентов)
-- **Не используйте React Testing Library запросы неправильно**: используйте `screen.getByRole`, `getByText` вместо `querySelector`
+- Don't test implementation details (internal state, private methods)
+- Don't rely on specific DOM structure
+- Don't use `container.querySelector` instead of semantic queries
+- Don't make tests dependent on each other
+- Don't test library code (React, Material-UI)
+- **Don't write time-dependent unstable tests**: `setTimeout`, current time dependency without `jest.useFakeTimers()`/time mocking
+- **Don't hide logic in beforeEach**: complex Arrange parts in hooks make tests unclear
+- **Don't write one test for multiple scenarios**: split into separate cases
+- **Don't test implementation details**: test user-visible behavior, not internal state (especially for React components)
+- **Don't use React Testing Library queries incorrectly**: use `screen.getByRole`, `getByText` instead of `querySelector`
 
-## **Запросы элементов (приоритет)**
+## **Element Queries (Priority)**
 
-1. **getByRole** - самый доступный способ
-2. **getByLabelText** - для форм
-3. **getByPlaceholderText** - для input полей
-4. **getByText** - для текстового контента
-5. **getByDisplayValue** - для form элементов с значениями
-6. **getByAltText** - для изображений
-7. **getByTitle** - для элементов с title
-8. **getByTestId** - последний вариант
+1. **getByRole** - most accessible approach
+2. **getByLabelText** - for forms
+3. **getByPlaceholderText** - for input fields
+4. **getByText** - for text content
+5. **getByDisplayValue** - for form elements with values
+6. **getByAltText** - for images
+7. **getByTitle** - for elements with title
+8. **getByTestId** - last resort
 
 ```typescript
-// ✅ Хорошо
+// ✅ Good
 screen.getByRole('button', { name: /submit/i });
 screen.getByLabelText(/username/i);
 
-// ❌ Плохо
+// ❌ Bad
 container.querySelector('.submit-button');
-screen.getByTestId('submit-button'); // только если нет других вариантов
+screen.getByTestId('submit-button'); // only if no other options
 ```
 
-## **Команды для запуска тестов**
+## **Commands for Running Tests**
 
-Ссылайтесь на [TESTING.md](mdc:app/TESTING.md) для полного списка команд:
+Refer to [TESTING.md](mdc:app/TESTING.md) for the complete list of commands:
 
 ```bash
-# Запуск всех тестов
+# Run all tests
 yarn test
 
-# Запуск с покрытием кода
+# Run with code coverage
 yarn test:coverage
 
-# Запуск конкретного теста
+# Run specific test
 yarn test Notifier.test.tsx
 ```
 
-## **Конфигурация**
+## **Configuration**
 
-### Jest setup (текущая конфигурация)
+### Jest Setup (Current Configuration)
 
 **App (`app/jest.config.js`):**
 ```javascript
@@ -433,31 +433,31 @@ module.exports = {
 ```
 
 - **Jest config**: [jest.config.js](mdc:app/jest.config.js)
-- **Setup файл**: [jest.setup.js](mdc:app/jest.setup.js)
-- **Test environment**: `jest-environment-jsdom` для React компонентов
-- **Module mapping**: Поддержка path aliases (`@/...`)
+- **Setup file**: [jest.setup.js](mdc:app/jest.setup.js)
+- **Test environment**: `jest-environment-jsdom` for React components
+- **Module mapping**: Support for path aliases (`@/...`)
 
-## **Покрытие кода**
+## **Code Coverage**
 
-После запуска `yarn test:coverage`:
-- HTML отчет: `coverage/lcov-report/index.html`
-- LCOV формат: `coverage/lcov.info` для CI/CD
+After running `yarn test:coverage`:
+- HTML report: `coverage/lcov-report/index.html`
+- LCOV format: `coverage/lcov.info` for CI/CD
 
-## **Отладка тестов**
+## **Test Debugging**
 
-### Использование debug в тестах
+### Using Debug in Tests
 ```typescript
 test('debug example', () => {
   const { debug } = render(<MyComponent />);
-  debug(); // Выводит HTML в консоль
-  
-  // Или для конкретного элемента
+  debug(); // Outputs HTML to console
+
+  // Or for a specific element
   debug(screen.getByRole('button'));
 });
 ```
 
-### VS Code конфигурация
-Добавьте в `.vscode/launch.json` для отладки:
+### VS Code Configuration
+Add to `.vscode/launch.json` for debugging:
 
 ```json
 {
@@ -472,15 +472,15 @@ test('debug example', () => {
 }
 ```
 
-## **Примеры тестов из кодовой базы**
+## **Test Examples from Codebase**
 
-- [Notifier.test.tsx](mdc:app/components/common/__tests__/Notifier.test.tsx) - тестирование React компонентов
-- [isMobile.test.ts](mdc:app/lib/__tests__/isMobile.test.ts) - тестирование утилит
+- [Notifier.test.tsx](mdc:app/components/common/__tests__/Notifier.test.tsx) - React components testing
+- [isMobile.test.ts](mdc:app/lib/__tests__/isMobile.test.ts) - utilities testing
 
-Обращайтесь к [TESTING.md](mdc:app/TESTING.md) за дополнительными примерами и подробностями.
+Refer to [TESTING.md](mdc:app/TESTING.md) for additional examples and details.
 
-## **Ссылки**
+## **References**
 
-- **Общие принципы TDD**: [.cursor/rules/tdd-jest-typescript.mdc](mdc:.cursor/rules/tdd-jest-typescript.mdc)
+- **General TDD principles**: [.cursor/rules/tdd-jest-typescript.mdc](mdc:.cursor/rules/tdd-jest-typescript.mdc)
 - **API Testing**: [.cursor/rules/api-testing.mdc](mdc:.cursor/rules/api-testing.mdc)
 - **E2E Testing**: [.cursor/rules/e2e-testing.mdc](mdc:.cursor/rules/e2e-testing.mdc)
