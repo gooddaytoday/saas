@@ -26,12 +26,12 @@ class MemberChooser extends React.Component<Props, State> {
       id: user._id,
     }));
 
-    const selectedItems = suggestions.filter(
-      (s) => this.props.selectedMemberIds.indexOf(s.id) !== -1,
-    );
+    const selectedItems = this.props.selectedMemberIds
+      ? suggestions.filter((s) => this.props.selectedMemberIds.indexOf(s.id) !== -1)
+      : [];
 
     this.state = {
-      selectedItems: selectedItems || [],
+      selectedItems: selectedItems,
     };
   }
 
@@ -65,7 +65,9 @@ class MemberChooser extends React.Component<Props, State> {
   }
 
   public handleChange = (event, value) => {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
 
     const selectedItems = value;
 

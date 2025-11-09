@@ -484,3 +484,7 @@ Refer to [TESTING.md](mdc:app/TESTING.md) for additional examples and details.
 - **General TDD principles**: [.cursor/rules/tdd-jest-typescript.mdc](mdc:.cursor/rules/tdd-jest-typescript.mdc)
 - **API Testing**: [.cursor/rules/api-testing.mdc](mdc:.cursor/rules/api-testing.mdc)
 - **E2E Testing**: [.cursor/rules/e2e-testing.mdc](mdc:.cursor/rules/e2e-testing.mdc)
+
+## Lint errors
+
+When tests have been written, check that there are no eslint or typescript errors. If there are, fix them all.
