@@ -1,0 +1,550 @@
+---
+description: Clean Code Guidelines for maintainable and readable code
+globs: ["**/*.js", "**/*.ts", "**/*.py", "**/*.java", "**/*.cpp", "**/*.c", "**/*.cs", "**/*.php", "**/*.rb", "**/*.go", "**/*.rs"]
+alwaysApply: true
+---
+
+# Clean Code Guidelines
+
+These guidelines ensure code is readable, maintainable, and follows industry best practices. Apply these principles consistently across all programming languages.
+
+## Meaningful Names
+
+- **Use descriptive and meaningful names** for variables, functions, classes, and modules
+- **Avoid abbreviations** unless they are widely recognized and documented
+- **Follow consistent naming conventions** for your language/framework
+- **Names should reveal intent** - make it clear what the code does
+
+### ✅ Good Examples
+```typescript
+// Variables with clear purpose
+let userProfileData = fetchUserData(userId);
+let isUserAuthenticated = checkAuthStatus(token);
+
+// Functions that describe what they do
+function calculateTotalPriceWithTax(items, taxRate) { /* ... */ }
+function sendWelcomeEmailToNewUser(user) { /* ... */ }
+```
+
+### ❌ Anti-patterns
+```typescript
+// Unclear abbreviations
+let upd = fetchUserData(userId); // What does 'upd' mean?
+let auth = checkAuthStatus(token); // Too vague
+
+// Functions that don't reveal intent
+function process(x, y) { /* What does this process? */ }
+function handle(z) { /* What is being handled? */ }
+```
+
+## Single Responsibility Principle (SRP)
+
+- **Each function/class/module should have ONE primary responsibility**
+- **Keep functions small and focused** - ideally under 20-30 lines
+- **Split complex functions** into smaller, well-named helper functions
+- **Classes should have ONE reason to change**
+
+### ✅ Good Examples
+```typescript
+class UserAuthenticationService {
+  async authenticateUser(email: string, password: string): Promise<User> {
+    const user = await this.validateCredentials(email, password);
+    return await this.generateAuthToken(user);
+  }
+
+  private async validateCredentials(email: string, password: string): Promise<User> {
+    // Only handles credential validation
+  }
+
+  private async generateAuthToken(user: User): Promise<User> {
+    // Only handles token generation
+  }
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+class UserManager {
+  authenticate(email, password) {
+    // Validates credentials AND sends email AND logs AND updates cache
+    this.validateCredentials(email, password);
+    this.sendWelcomeEmail(email);
+    this.logUserLogin(email);
+    this.updateUserCache(email);
+  }
+}
+```
+
+## DRY (Don't Repeat Yourself)
+
+- **Avoid code duplication** by extracting common functionality
+- **Create reusable functions/classes** for repeated logic
+- **Use constants** for magic numbers and strings
+- **Implement proper abstraction layers**
+
+### ✅ Good Examples
+```typescript
+// Extract constants
+const HTTP_STATUS_OK = 200;
+const HTTP_STATUS_BAD_REQUEST = 400;
+const MAX_RETRY_ATTEMPTS = 3;
+
+// Extract repeated logic
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function validateUserInput(email: string, password: string) {
+  if (!validateEmail(email)) throw new Error('Invalid email');
+  if (!password || password.length < 8) throw new Error('Password too short');
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+// Repeated validation logic
+function registerUser(email: string, password: string) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error('Invalid email');
+  }
+  // ... more code
+}
+
+function loginUser(email: string, password: string) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error('Invalid email');
+  }
+  // Same regex used again - violates DRY
+}
+```
+
+## Error Handling
+
+- **Implement proper error handling** for all operations that can fail
+- **Use appropriate error types** for different failure scenarios
+- **Provide meaningful error messages** that help with debugging
+- **Don't ignore or silently catch errors** unless you have a good reason
+- **Handle errors at the appropriate level** of abstraction
+
+### ✅ Good Examples
+```typescript
+async function fetchUserData(userId: string): Promise<UserData> {
+  try {
+    const response = await api.get(`/users/${userId}`);
+    if (!response.ok) {
+      throw new ApiError(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.data;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      logger.error('API request failed', { userId, error: error.message });
+      throw new UserFacingError('Unable to load user data. Please try again.');
+    }
+    // Re-throw unexpected errors
+    throw error;
+  }
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+async function badFetchUserData(userId: string) {
+  try {
+    return await api.get(`/users/${userId}`);
+  } catch (e) {
+    console.log(e); // ❌ Silently ignoring errors
+  }
+}
+```
+
+## Code Comments and Documentation
+
+- **Write comments to explain the 'WHY', not the 'WHAT'**
+- **Keep comments up-to-date** with code changes
+- **Use JSDoc/Similar documentation** for public APIs
+- **Document complex business logic** and non-obvious algorithms
+- **Avoid obvious comments** that don't add value
+
+### ✅ Good Examples
+```typescript
+/**
+ * Calculates the total price including tax using progressive tax brackets.
+ * This implements the tax calculation as specified in requirement DOC-123.
+ * @param amount - Base amount before tax
+ * @param region - Tax region code (e.g., 'US-CA', 'EU-DE')
+ * @returns Total amount including all applicable taxes
+ */
+function calculateTaxedPrice(amount: number, region: string): number {
+  // Apply base tax rate for amounts under $1000
+  if (amount <= 1000) {
+    return amount * (1 + getBaseTaxRate(region));
+  }
+
+  // Progressive taxation: 10% on first $1000, 20% on remainder
+  const baseAmount = 1000 * (1 + getBaseTaxRate(region));
+  const remainder = (amount - 1000) * (1 + getProgressiveTaxRate(region));
+  return baseAmount + remainder;
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+function add(x, y) {
+  // Add x and y together - obvious comment that adds no value
+  return x + y;
+}
+
+function calculateTaxedPrice(amount: number, region: string): number {
+  // This comment is outdated after recent changes
+  return amount * 1.1; // 10% tax
+}
+```
+
+## Consistent Formatting and Style
+
+- **Follow consistent indentation** (spaces or tabs - be consistent)
+- **Use consistent spacing** around operators and keywords
+- **Apply consistent line length limits** (typically 80-120 characters)
+- **Use linters and formatters** to enforce style guidelines
+- **Group related code logically** with proper spacing
+
+### ✅ Good Examples
+```typescript
+function calculateStatistics(values: number[]): Statistics {
+  const {
+    min,
+    max,
+    sum,
+    count
+  } = values.reduce((acc, value) => ({
+    min: Math.min(acc.min, value),
+    max: Math.max(acc.max, value),
+    sum: acc.sum + value,
+    count: acc.count + 1
+  }), { min: Infinity, max: -Infinity, sum: 0, count: 0 });
+
+  return {
+    average: sum / count,
+    median: calculateMedian(values),
+    range: max - min
+  };
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+function badCalculateStatistics(values: number[]): Statistics {
+  const {min,max,sum,count}=values.reduce((acc,value)=>({min:Math.min(acc.min,value),max:Math.max(acc.max,value),sum:acc.sum+value,count:acc.count+1}),{min:Infinity,max:-Infinity,sum:0,count:0});
+  return {average:sum/count,median:calculateMedian(values),range:max-min};
+}
+```
+
+## Function Design
+
+- **Keep functions small and focused** (under 20-30 lines when possible)
+- **Limit function parameters** (4 or fewer is ideal)
+- **Use default parameters** appropriately
+- **Return early** to avoid deep nesting
+- **Make side effects obvious** in function names
+
+### ✅ Good Examples
+```typescript
+function createUser(email: string, options: UserOptions = {}): User {
+  const {
+    sendWelcomeEmail = true,
+    requireEmailVerification = false
+  } = options;
+
+  if (!isValidEmail(email)) {
+    throw new ValidationError('Invalid email format');
+  }
+
+  const user = await database.createUser(email);
+
+  if (requireEmailVerification) {
+    await sendVerificationEmail(user);
+    return user; // Return early
+  }
+
+  if (sendWelcomeEmail) {
+    await sendWelcomeEmail(user);
+  }
+
+  return user;
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+function processUser(email, options = {}) {
+  // Too many responsibilities in one function
+  if (email) {
+    if (validateEmail(email)) {
+      const user = createUser(email);
+      if (options.sendEmail) {
+        sendEmail(user);
+      }
+      if (options.requireVerification) {
+        sendVerification(user);
+      }
+      return user;
+    } else {
+      throw new Error('Invalid email');
+    }
+  }
+}
+```
+
+## Testing and Quality
+
+- **Write unit tests** for all business logic functions
+- **Test edge cases** and error conditions
+- **Maintain high test coverage** (aim for 80%+)
+- **Use descriptive test names** that explain the scenario
+- **Test behavior, not implementation details**
+
+### ✅ Good Examples
+```typescript
+describe('UserService.createUser', () => {
+  it('should create a new user with valid email', async () => {
+    const userService = new UserService(mockDatabase);
+    const result = await userService.createUser('test@example.com');
+    expect(result.email).toBe('test@example.com');
+  });
+
+  it('should throw ValidationError for invalid email', async () => {
+    const userService = new UserService(mockDatabase);
+    await expect(userService.createUser('invalid-email'))
+      .rejects.toThrow(ValidationError);
+  });
+
+  it('should send welcome email by default', async () => {
+    const userService = new UserService(mockDatabase, mockEmailService);
+    await userService.createUser('test@example.com');
+    expect(mockEmailService.sendWelcomeEmail).toHaveBeenCalled();
+  });
+});
+```
+
+### ❌ Anti-patterns
+```typescript
+describe('UserService', () => {
+  it('should work', async () => {
+    // Too vague - doesn't specify what should happen
+  });
+
+  it('should handle email', async () => {
+    // Missing assertion - doesn't verify the behavior
+  });
+});
+```
+
+## Version Control Best Practices
+
+- **Write clear and concise commit messages**
+- **Make small, focused commits** for easier code reviews
+- **Use meaningful branch names** that describe the feature/work
+- **Keep commit history clean** and logical
+
+### ✅ Good Examples
+```bash
+# Feature commits
+git commit -m "feat: add user authentication with JWT tokens"
+git commit -m "feat: implement password reset functionality"
+git commit -m "fix: resolve email validation edge case"
+
+# Branch naming
+git checkout -b feature/user-authentication
+git checkout -b bugfix/email-validation-fix
+git checkout -b refactor/api-error-handling
+```
+
+### ❌ Anti-patterns
+```bash
+# Poor commit messages
+git commit -m "fix"
+git commit -m "update"
+git commit -m "stuff"
+
+# Unclear branch names
+git checkout -b new-feature
+git checkout -b fix-stuff
+git checkout -b update-thing
+```
+
+## Performance Considerations
+
+- **Profile critical sections** before optimizing
+- **Use appropriate data structures** for the job
+- **Avoid premature optimization** - focus on readability first
+- **Consider memory usage** for large datasets
+- **Use caching strategically** for expensive operations
+
+### ✅ Good Examples
+```typescript
+// Efficient data processing
+function processLargeDataset(items: Item[]): ProcessedItem[] {
+  // Use Map for O(1) lookups instead of O(n) array searching
+  const lookupMap = new Map<string, Item>();
+  items.forEach(item => lookupMap.set(item.id, item));
+
+  return items.map(item => {
+    const relatedItem = lookupMap.get(item.relatedId);
+    return processItem(item, relatedItem);
+  });
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+// Inefficient processing
+function badProcessLargeDataset(items: Item[]): ProcessedItem[] {
+  return items.map(item => {
+    // O(n) search in every iteration - very slow for large arrays
+    const relatedItem = items.find(i => i.id === item.relatedId);
+    return processItem(item, relatedItem);
+  });
+}
+```
+
+## Security Best Practices
+
+- **Validate and sanitize all user inputs**
+- **Use parameterized queries** to prevent SQL injection
+- **Implement proper authentication and authorization**
+- **Avoid hardcoding sensitive information**
+- **Keep dependencies updated** and audit for vulnerabilities
+- **Use HTTPS** for all data transmission
+- **Implement proper session management**
+- **Log security events** for monitoring
+
+### ✅ Good Examples
+```typescript
+function authenticateUser(username: string, password: string): User | null {
+  // Sanitize inputs to prevent injection attacks
+  const cleanUsername = sanitizeInput(username);
+  const cleanPassword = sanitizeInput(password);
+
+  // Use parameterized queries
+  const query = 'SELECT * FROM users WHERE username = ? AND password_hash = ?';
+  const user = database.query(query, [cleanUsername, hashPassword(cleanPassword)]);
+
+  if (user && verifyPassword(cleanPassword, user.passwordHash)) {
+    // Log successful authentication for security monitoring
+    logger.info('User authenticated', { userId: user.id, ip: getClientIp() });
+    return user;
+  }
+
+  return null;
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+function badAuthenticateUser(username: string, password: string): User | null {
+  // Dangerous - vulnerable to SQL injection
+  const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
+  const user = database.query(query);
+
+  return user;
+}
+```
+
+## Code Organization
+
+- **Group related functionality** in the same module/package
+- **Use clear file and folder structure**
+- **Implement proper abstraction layers**
+- **Separate concerns** (business logic, data access, presentation)
+- **Use dependency injection** for better testability
+
+### ✅ Good Examples
+```typescript
+// src/
+//   ├── users/
+//   │   ├── controllers/UserController.ts
+//   │   ├── services/UserService.ts
+//   │   ├── repositories/UserRepository.ts
+//   │   └── models/User.ts
+//   ├── orders/
+//   │   ├── controllers/OrderController.ts
+//   │   ├── services/OrderService.ts
+//   │   ├── repositories/OrderRepository.ts
+//   │   └── models/Order.ts
+//   └── shared/
+//       ├── utils/validation.ts
+//       └── utils/database.ts
+```
+
+### ❌ Anti-patterns
+```typescript
+// src/
+//   ├── UserController.ts
+//   ├── UserService.ts
+//   ├── OrderController.ts
+//   ├── OrderService.ts
+//   ├── UserRepository.ts
+//   ├── OrderRepository.ts
+//   └── utils.ts (mixing all utilities together)
+```
+
+## Constants and Magic Numbers
+
+- **Extract magic numbers and strings** into named constants
+- **Use enums** for related constant values
+- **Group related constants** in the same location
+- **Document the meaning** of important constants
+
+### ✅ Good Examples
+```typescript
+// Constants at the top of the file or in a separate constants file
+const HTTP_STATUS_CODES = {
+  OK: 200,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500
+} as const;
+
+const USER_ROLES = {
+  ADMIN: 'admin',
+  USER: 'user',
+  GUEST: 'guest'
+} as const;
+
+const RATE_LIMITS = {
+  REQUESTS_PER_MINUTE: 60,
+  REQUESTS_PER_HOUR: 1000,
+  BURST_LIMIT: 10
+} as const;
+
+// Usage
+if (response.status === HTTP_STATUS_CODES.UNAUTHORIZED) {
+  throw new AuthenticationError('Access denied');
+}
+```
+
+### ❌ Anti-patterns
+```typescript
+// Magic numbers scattered throughout code
+if (response.status === 401) {
+  // What does 401 mean? Need to look it up
+  throw new Error('Access denied');
+}
+
+if (response.status === 200) {
+  // Another magic number
+  return response.data;
+}
+```
+
+## References
+
+- **Clean Code: A Handbook of Agile Software Craftsmanship** by Robert C. Martin
+- **Refactoring: Improving the Design of Existing Code** by Martin Fowler
+- **The Pragmatic Programmer** by Andrew Hunt and David Thomas
+- **Code Complete** by Steve McConnell
+
+Apply these principles consistently to maintain high code quality and improve maintainability.
