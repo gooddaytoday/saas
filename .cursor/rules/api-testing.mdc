@@ -5,13 +5,13 @@ globs: api/**/*.ts,api/**/*.test.ts,api/**/*.spec.ts
 
 # API Testing Guidelines
 
-Руководство по написанию тестов для API сервера с использованием Jest и TypeScript.
+Guide for writing tests for API server using Jest and TypeScript.
 
-## **Структура тестов**
+## **Test Structure**
 
-- **Размещение тестов**: Создавайте тесты в папках `__tests__` рядом с тестируемыми файлами
-- **Именование**: Используйте суффикс `.test.ts` для тестовых файлов
-- **Организация**: Группируйте связанные тесты в `describe` блоки
+- **Test placement**: Create tests in `__tests__` folders next to the files being tested
+- **Naming**: Use the `.test.ts` suffix for test files
+- **Organization**: Group related tests in `describe` blocks
 
 ```
 server/
@@ -29,9 +29,9 @@ server/
       team-leader.test.ts
 ```
 
-## **Основные паттерны Jest**
+## **Basic Jest Patterns**
 
-### Базовая структура теста
+### Basic test structure
 ```typescript
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import { functionToTest } from '../functionToTest';
@@ -44,7 +44,7 @@ describe('functionToTest', () => {
 });
 ```
 
-### Тестирование async функций
+### Testing async functions
 ```typescript
 describe('asyncFunction', () => {
   test('resolves with correct value', async () => {
@@ -57,10 +57,10 @@ describe('asyncFunction', () => {
 });
 ```
 
-## **Тестирование базы данных MongoDB**
+## **MongoDB Database Testing**
 
-### Подключение к тестовой БД
-Используйте MongoDB Memory Server для изолированного тестирования в памяти:
+### Connecting to test database
+Use MongoDB Memory Server for isolated in-memory testing:
 ```typescript
 import User from '../../models/User';
 import { setupTestDb, teardownTestDb } from '../utils/__tests__/testDbHelper';
@@ -80,17 +80,17 @@ describe('database test', () => {
 });
 ```
 
-MongoDB Memory Server автоматически создает изолированный экземпляр MongoDB в памяти для каждого набора тестов и очищает его после завершения. Внешняя настройка базы данных не требуется.
+MongoDB Memory Server automatically creates an isolated MongoDB instance in memory for each test suite and cleans it up after completion. No external database setup is required.
 
-### Очистка тестовых данных
+### Cleaning up test data
 ```typescript
 afterEach(async () => {
-  // Очищаем коллекции после каждого теста
+  // Clear collections after each test
   await User.deleteMany({});
 });
 ```
 
-## **Тестирование API endpoints**
+## **Testing API endpoints**
 
 ```typescript
 import request from 'supertest';
@@ -120,178 +120,177 @@ describe('API endpoints', () => {
 });
 ```
 
-## **Переменные окружения для тестов**
+## **Environment Variables for Tests**
 
-- **MongoDB Memory Server**: Используется автоматически, переменная `MONGO_URL_TEST` не требуется
-- **Установите**: `NODE_ENV=test` в тестовом окружении
-- **Загружайте**: другие переменные окружения через `jest.setup.ts` или в `beforeAll`
+- **MongoDB Memory Server**: Used automatically, `MONGO_URL_TEST` variable not required
+- **Load**: Other environment variables via `jest.setup.ts` or in `beforeAll`
 
-## **TDD принципы разработки**
+## **TDD Development Principles**
 
-### Основной цикл TDD (Red → Green → Refactor)
-- **Red**: Сначала напишите минимальный failing тест, отражающий требуемое поведение
-- **Green**: Реализуйте минимальный код, чтобы тест прошел
-- **Refactor**: Рефакторите код и тесты, сохраняя их зелеными
+### Main TDD cycle (Red → Green → Refactor)
+- **Red**: First write a minimal failing test reflecting the required behavior
+- **Green**: Implement minimal code to pass the test
+- **Refactor**: Refactor code and tests while keeping them green
 
-### Контроль покрытия и качества
-- **Обязательное покрытие**: не менее 80% для lines, functions, branches и statements
-- **Запрет**: не сливать код без прохождения unit тестов и достижения порога покрытия
-- **Каждый запуск coverage**: после команды coverage все метрики должны быть ≥ 80%
-- **Перед закрытием subtask**: запустите проверку coverage и убедитесь, что все метрики ≥ 80%. Если хоть одна < 80% — добавьте тесты/рефакторите и не закрывайте subtask
+### Coverage control and quality
+- **Mandatory coverage**: at least 80% for lines, functions, branches, and statements
+- **Prohibition**: Do not merge code without passing unit tests and achieving coverage threshold
+- **Each coverage run**: after running coverage, all metrics must be ≥ 80%
+- **Before closing subtask**: Run coverage check and ensure all metrics ≥ 80%. If any metric < 80% — add tests/refactor and do not close subtask
 
-### Структура тестов и конвенции
-- **Расположение API тестов**: `api/server/**/__tests__/**/*.test.ts` - рядом с тестируемыми файлами
-- **Имена файлов**: `*.test.ts` для unit тестов
-- **AAA паттерн**: Arrange → Act → Assert обязателен в тест-кейсах
-- **Детерминизм**: unit тесты не должны обращаться к network/DB/time с побочными эффектами — используйте mocks/stubs/fake timers
-- **Выборочное выполнение тестов**: при написании и отладке тестов запускайте только те тесты, над которыми работаете (используйте флаги `--testNamePattern`, `--testPathPattern` или запуск конкретного файла)
+### Test structure and conventions
+- **API test placement**: `api/server/**/__tests__/**/*.test.ts` - next to the files being tested
+- **File names**: `*.test.ts` for unit tests
+- **AAA pattern**: Arrange → Act → Assert is mandatory in test cases
+- **Determinism**: Unit tests should not access network/DB/time with side effects — use mocks/stubs/fake timers
+- **Selective test execution**: When writing and debugging tests, run only the tests you're working on (use `--testNamePattern`, `--testPathPattern` flags or run a specific file)
 
-### Выборочное выполнение тестов (только те, над которыми работаете)
+### Selective test execution (only tests you're working on)
 
-#### 1. Запуск конкретного файла тестов (САМЫЙ БЫСТРЫЙ ПОДХОД)
+#### 1. Running a specific test file (FASTEST APPROACH)
 ```bash
-# Запуск только одного файла тестов
+# Run only one test file
 cd api && yarn test server/utils/__tests__/slugify.test.ts
 
-# Сокращенный вариант (работает если путь имеет уникальные символы)
+# Shortened variant (works if path has unique characters)
 cd api && yarn test slugify.test.ts
 ```
 
-#### 2. Запуск тестов по имени (используйте `--testNamePattern` / `-t`)
+#### 2. Running tests by name (use `--testNamePattern` / `-t`)
 ```bash
-# Запуск тестов содержащих "slugify"
+# Run tests containing "slugify"
 cd api && yarn test -t "slugify"
 
-# Запуск тестов соответствующих точному regex
+# Run tests matching exact regex
 cd api && yarn test -t "^MyFunction should"
 ```
 
-#### 3. Запуск тестов по пути (используйте `--testPathPattern`)
+#### 3. Running tests by path (use `--testPathPattern`)
 ```bash
-# Запуск всех тестов в конкретной папке
+# Run all tests in specific folder
 cd api && yarn test --testPathPattern="utils"
 
-# Запуск тестов из конкретной папки
+# Run tests from specific folder
 cd api && yarn test --testPathPattern="models"
 ```
 
-#### 4. Запуск только измененных тестов
+#### 4. Run only changed tests
 ```bash
-# Запуск только тестов для измененных файлов (требует Git)
+# Run only tests for changed files (requires Git)
 cd api && yarn test --onlyChanged
 ```
 
-#### 5. Debug режим (пошаговое выполнение)
+#### 5. Debug mode (step-by-step execution)
 ```bash
-# Запуск тестов в debug режиме (открывает Chrome DevTools)
+# Run tests in debug mode (opens Chrome DevTools)
 cd api
 node --inspect-brk ./node_modules/.bin/jest --runInBand server/utils/__tests__/slugify.test.ts
 ```
 
-**Рекомендуемые сценарии:**
+**Recommended scenarios:**
 
-| Сценарий | Команда | Когда использовать |
-|----------|---------|-------------------|
-| Разработка API unit теста | `cd api && yarn test slugify.test.ts` | Работа над API утилитой/моделью |
-| Проверка перед коммитом | `cd api && yarn test` | Перед `git commit` |
-| Проверка покрытия модуля | `cd api && yarn test --coverage slugify.test.ts` | Проверка покрытия нового кода |
-| Финальная проверка покрытия | `cd api && yarn test --coverage` | Перед закрытием subtask (≥ 80%) |
+| Scenario | Command | When to use |
+|----------|---------|------------|
+| API unit test development | `cd api && yarn test slugify.test.ts` | Working on API utility/model |
+| Check before commit | `cd api && yarn test` | Before `git commit` |
+| Module coverage check | `cd api && yarn test --coverage slugify.test.ts` | Checking new code coverage |
+| Final coverage check | `cd api && yarn test --coverage` | Before closing subtask (≥ 80%) |
 
-### Минимальные требования к новому коду
+### Minimum requirements for new code
 
 **API Server:**
-- Любая новая public функция/класс/модель в `api/server/**` должна сопровождаться unit тестами в папке `__tests__/`
-- Любая ошибка должна сначала исправляться с regression тестом (red), затем реализацией
-- Mocks/stubs обязательны для внешних границ: network, filesystem, time, process/ENV, Stripe, AWS, Google Auth
-- Для тестов базы данных используйте MongoDB Memory Server (see [api/TESTING.md](mdc:api/TESTING.md))
-- Старайтесь избегать `any` типов в **коде** и **тестах**
+- Any new public function/class/model in `api/server/**` must be accompanied by unit tests in `__tests__/` folder
+- Any bug should first be fixed with a regression test (red), then implementation
+- Mocks/stubs are mandatory for external boundaries: network, filesystem, time, process/ENV, Stripe, AWS, Google Auth
+- For database tests use MongoDB Memory Server (see [api/TESTING.md](mdc:api/TESTING.md))
+- Try to avoid `any` types in **code** and **tests**
 
-### ❌ Anti-patterns (запрещено)
+### ❌ Anti-patterns (prohibited)
 
-- **Network/DB вызовы в unit тестах**: вызовы внешних API/MongoDB без mocks
-- **Нестабильное время**: `setTimeout`, зависимость от текущего времени без `jest.useFakeTimers()`/time mocking
-- **Скрытая логика в beforeEach**: сложные Arrange части скрытые в хуках делают тесты непонятными
-- **Один тест покрывающий множественные сценарии**: разделяйте на отдельные кейсы
-- **Тестирование деталей реализации**: тестируйте поведение, видимое пользователю
+- **Network/DB calls in unit tests**: external API/MongoDB calls without mocks
+- **Unstable time**: `setTimeout`, dependency on current time without `jest.useFakeTimers()`/time mocking
+- **Hidden logic in beforeEach**: complex Arrange parts hidden in hooks make tests unclear
+- **One test covering multiple scenarios**: split into separate cases
+- **Testing implementation details**: test behavior visible to the user
 
-### Как достичь branch coverage 80%+
+### How to achieve 80%+ branch coverage
 
-- **Покрывайте все ветки условий**: if/else, switch, guard clauses, early returns
-- **Негативные сценарии**: ошибки валидации, пустые входы, отсутствующие зависимости
-- **Граничные значения**: даты/время (например, 0/30/31/180/181 дней), пустые/мин/макс строки
-- **Флаги/дефолты**: тестируйте влияние флагов и дефолтов (например, `isPopular` true/false)
-- **Параметризация**: используйте `it.each` для покрытия альтернатив
+- **Cover all condition branches**: if/else, switch, guard clauses, early returns
+- **Negative scenarios**: validation errors, empty inputs, missing dependencies
+- **Boundary values**: dates/time (e.g., 0/30/31/180/181 days), empty/min/max strings
+- **Flags/defaults**: test impact of flags and defaults (e.g., `isPopular` true/false)
+- **Parameterization**: use `it.each` to cover alternatives
 
 ```typescript
-// ✅ DO: покрывайте обе ветки и границы
+// ✅ DO: cover both branches and boundaries
 it.each([{ d: 0 }, { d: 30 }, { d: 31 }, { d: 180 }, { d: 181 }])('freshness boundary $d', ({ d }) => {
   const score = scorer.calculateRelevanceScore({ baseScore: 80, matchType: 'partial', updatedAt: daysAgo(d) } as any);
   expect(score).toBeGreaterThanOrEqual(80);
 });
 
-// ❌ DON'T: только "happy path" без альтернатив
+// ❌ DON'T: only "happy path" without alternatives
 ```
 
-### Обязательные проверки перед merge/subtask done
+### Mandatory checks before merge/subtask done
 
-**Для API изменений:**
-- `cd api && yarn test` — все тесты должны проходить
-- `cd api && yarn test --coverage` — все метрики покрытия ≥ 80%
-- При необходимости — добавьте недостающие тесты для повышения branch coverage
+**For API changes:**
+- `cd api && yarn test` — all tests must pass
+- `cd api && yarn test --coverage` — all coverage metrics ≥ 80%
+- If needed — add missing tests to improve branch coverage
 
 ## **Best Practices**
 
 ### ✅ DO:
-- **Описательные имена тестов** - четко описывайте что тестируете
-- **Группировка тестов** - используйте `describe` для логической группировки
-- **Очистка после тестов** - используйте `afterEach`/`beforeEach` для сброса состояния
-- **Тестируйте поведение, не реализацию** - фокусируйтесь на ожидаемых результатах
-- **Изоляция тестов** - каждый тест должен быть независимым
-- **Моки внешних зависимостей** - используйте Jest моки для внешних сервисов
-- **Тестируйте крайние случаи** - включайте тесты для ошибок и граничных условий
-- **Следуйте TDD циклу** - Red → Green → Refactor для каждого изменения
-- **Выборочное выполнение** - запускайте только тесты над которыми работаете
-- **Минимальное покрытие 80%** - проверяйте перед каждым коммитом
+- **Descriptive test names** - clearly describe what you're testing
+- **Group tests** - use `describe` for logical grouping
+- **Clean up after tests** - use `afterEach`/`beforeEach` to reset state
+- **Test behavior, not implementation** - focus on expected results
+- **Test isolation** - each test should be independent
+- **Mock external dependencies** - use Jest mocks for external services
+- **Test edge cases** - include tests for errors and boundary conditions
+- **Follow TDD cycle** - Red → Green → Refactor for each change
+- **Selective execution** - run only tests you're working on
+- **Minimum 80% coverage** - check before each commit
 
 ### ❌ DON'T:
-- Не тестируйте против production базы данных
-- Не оставляйте тестовые данные после тестов
-- Не делайте тесты зависимыми друг от друга
-- Не тестируйте детали реализации
-- Не пишите код без тестов (кроме прототипирования)
-- Не сливайте код с покрытием < 80%
+- Don't test against production database
+- Don't leave test data after tests
+- Don't make tests dependent on each other
+- Don't test implementation details
+- Don't write code without tests (except prototyping)
+- Don't merge code with coverage < 80%
 
-## **Команды для запуска тестов**
+## **Commands for Running Tests**
 
-Ссылайтесь на [TESTING.md](mdc:api/TESTING.md) для полного списка команд:
+See [TESTING.md](mdc:api/TESTING.md) for full command list:
 
 ```bash
-# Запуск всех тестов
+# Run all tests
 yarn test
 
-# Запуск с покрытием кода
+# Run with code coverage
 yarn test --coverage
 
-# Запуск конкретного теста
+# Run specific test
 yarn test slugify.test.ts
 ```
 
-## **Конфигурация**
+## **Configuration**
 
 - **Jest config**: [jest.config.ts](mdc:api/jest.config.ts)
-- **Setup файл**: [jest.setup.ts](mdc:api/jest.setup.ts)
-- **TypeScript preset**: `ts-jest` для поддержки TypeScript
-- **Test environment**: `node` для серверного кода
+- **Setup file**: [jest.setup.ts](mdc:api/jest.setup.ts)
+- **TypeScript preset**: `ts-jest` for TypeScript support
+- **Test environment**: `node` for server code
 
-## **Покрытие кода**
+## **Code Coverage**
 
-После запуска `yarn test --coverage`:
-- HTML отчет: `coverage/lcov-report/index.html`
-- LCOV формат: `coverage/lcov.info` для CI/CD
+After running `yarn test --coverage`:
+- HTML report: `coverage/lcov-report/index.html`
+- LCOV format: `coverage/lcov.info` for CI/CD
 
-## **Примеры тестов из кодовой базы**
+## **Test Examples from Codebase**
 
-- [slugify.test.ts](mdc:api/server/utils/__tests__/slugify.test.ts) - тестирование утилит
-- [sum.test.ts](mdc:api/server/utils/__tests__/sum.test.ts) - базовые unit тесты
+- [slugify.test.ts](mdc:api/server/utils/__tests__/slugify.test.ts) - testing utilities
+- [sum.test.ts](mdc:api/server/utils/__tests__/sum.test.ts) - basic unit tests
 
-Обращайтесь к [TESTING.md](mdc:api/TESTING.md) за дополнительными примерами и подробностями.
+Refer to [TESTING.md](mdc:api/TESTING.md) for additional examples and details.
