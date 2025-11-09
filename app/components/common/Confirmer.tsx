@@ -55,16 +55,25 @@ class Confirmer extends React.Component<any, State> {
 
   public handleClose = () => {
     this.setState({ open: false });
-    this.state.onAnswer(false);
+    if (this.state.onAnswer) {
+      this.state.onAnswer(false);
+    }
   };
 
   public handleYes = () => {
     this.setState({ open: false });
-    this.state.onAnswer(true);
+    if (this.state.onAnswer) {
+      this.state.onAnswer(true);
+    }
   };
 
   public openConfirmDialog = ({ title, message, onAnswer }) => {
-    this.setState({ open: true, title, message, onAnswer });
+    this.setState({
+      open: true,
+      ...(title !== undefined && { title }),
+      ...(message !== undefined && { message }),
+      onAnswer,
+    });
   };
 }
 
