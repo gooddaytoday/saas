@@ -44,10 +44,17 @@
     - 🔴 User Settings module (10 тестов)
   - **Модули**: Real-time, Billing (partial), User Settings
 
-#### 📧 Фаза 4: Notifications & Billing (Week 7-8)
-- **phase-4-extended.md** - 🔴 TODO
-  - **Цель**: Завершение P2 (30 тестов)
-  - **Модули**: Notifications, Billing (complete), Edge Cases
+#### 📧 Фаза 4: Notifications & Billing Complete (Week 7-8)
+- **[phase-4-notifications-billing.md](./phase-4-notifications-billing.md)** - 🔴 Не начата (план готов)
+  - **Статус**: 🔴 Не начата (ожидание завершения Фазы 3)
+  - **Цель**: Завершение P2 тестов (35-45 тестов)
+  - **Deliverables**:
+    - 🔴 `emailInbox` fixture (Mailhog integration)
+    - 🔴 Notifications module (16 тестов)
+    - 🔴 Billing module complete (15 тестов)
+    - 🔴 Edge Cases module (22 теста)
+    - 🔴 Webhook handling tests
+  - **Модули**: Email Notifications, Billing (complete), Edge Cases & Security
 
 #### 🎯 Фаза 5: Polish & Optimization (Week 9-10)
 - **phase-5-polish.md** - 🔴 TODO

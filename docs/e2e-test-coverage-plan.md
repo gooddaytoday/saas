@@ -449,12 +449,12 @@ export function createPostData(overrides = {}) {
 
 | Приоритет | Наборы тестов | Примерное кол-во | Время выполнения |
 |-----------|---------------|------------------|------------------|
-| **P0** | Smoke, Auth, Onboarding | 20-30 тестов | 3-5 минут |
-| **P1** | Teams, Discussions, Posts, Realtime | 50-70 тестов | 8-12 минут |
-| **P2** | Billing, Notifications, User Settings, Edge Cases | 40-60 тестов | 10-15 минут |
+| **P0** | Smoke, Auth, Onboarding | 20-30 тестов | 5-6 минут |
+| **P1** | Teams, Discussions, Posts, Realtime | 45-65 тестов | 13-17 минут |
+| **P2** | Billing, Notifications, User Settings, Edge Cases | ~70 тестов | 15-21 минут |
 | **P3** | Performance, Accessibility, Cross-browser | 20-30 тестов | 15-20 минут |
 
-**Итого**: ~150-190 тестов, ~35-50 минут на полный прогон (с параллелизацией)
+**Итого**: ~135-165 тестов (P0+P1+P2), ~33-44 минуты на полный прогон (с параллелизацией на 4 workers)
 
 ### 6.3 P0: Smoke & Critical Path
 
@@ -529,24 +529,23 @@ export function createPostData(overrides = {}) {
 
 ### 6.5 P2: Extended Features
 
-#### Billing (10-15 тестов, ~4-5 мин)
+#### Billing Complete (22 тестов, ~6-8 мин)
+**Фаза 3** (7 тестов):
 1. View billing page (leader only)
 2. Initiate Stripe Checkout (subscription mode)
 3. Complete checkout flow (test card)
-4. Subscription webhook handling
-5. Update payment method
-6. Cancel subscription
-7. View invoices history
-8. Non-leader cannot access billing
 
-#### Notifications (8-12 тестов, ~3-4 мин)
-1. Welcome email (new user)
-2. Invitation email (team invite)
-3. Login link email (passwordless)
-4. Post notification email (when mentioned)
-5. Email content validation
-6. Unsubscribe links work
-7. Email retry on failure
+**Фаза 4** (15 тестов):
+4. Update payment method (3 теста)
+5. Cancel subscription (4 теста)
+6. View invoices history (5 тестов)
+7. Webhook handling (3 теста)
+
+#### Notifications (16 тестов, ~3-4 мин)
+1. Welcome email tests (4 теста)
+2. Invitation email tests (4 теста)
+3. Login link email tests (4 теста)
+4. Post notification email tests (4 теста)
 
 #### User Settings (6-10 тестов, ~2-3 мин)
 1. Update profile name
@@ -556,19 +555,14 @@ export function createPostData(overrides = {}) {
 5. Avatar preview loads
 6. Profile slug updates
 
-#### Edge Cases (15-20 тестов, ~4-6 мин)
-1. Unauthorized access attempts (401)
-2. Forbidden actions (403)
-3. Invalid invitation tokens
-4. Expired sessions
-5. Expired passwordless tokens
-6. Invalid form submissions
-7. Network error handling
-8. CSRF protection
-9. SQL injection attempts (N/A for Mongo, but validate inputs)
-10. XSS protection (HTML escaping)
+#### Edge Cases (22 теста, ~4-6 мин)
+1. Unauthorized access tests (5 тестов)
+2. Invalid tokens tests (4 теста)
+3. Expired sessions tests (3 теста)
+4. Network errors tests (4 теста)
+5. Validation errors tests (6 тестов - включая XSS, SQL injection, form validation)
 
-**P2 Total**: ~39-57 тестов, ~13-18 минут
+**P2 Total**: ~70 тестов (22 billing + 16 notifications + 10 settings + 22 edge cases), ~15-21 минут
 
 ---
 
@@ -656,8 +650,9 @@ export function createPostData(overrides = {}) {
 
 **Deliverables**: ~30 тестов, WebSocket + Stripe + S3 fixtures
 
-#### Фаза 4: Notifications & Billing (Week 7-8)
-**Цель**: Завершение P2
+#### Фаза 4: Notifications & Billing Complete (Week 7-8)
+**Цель**: Завершение P2  
+**📋 Детальный план**: [e2e/plans/phase-4-notifications-billing.md](../e2e/plans/phase-4-notifications-billing.md)
 
 1. **Notifications Module**
    - [ ] `09-notifications/welcome-email.test.ts`
@@ -678,7 +673,7 @@ export function createPostData(overrides = {}) {
    - [ ] `11-edge-cases/network-errors.test.ts`
    - [ ] `11-edge-cases/validation-errors.test.ts`
 
-**Deliverables**: ~30 тестов, email capture, полное P2 покрытие
+**Deliverables**: ~53 тестов (16 notifications + 15 billing + 22 edge cases), email capture, полное P2 покрытие
 
 #### Фаза 5: Polish & Optimization (Week 9-10)
 **Цель**: Стабилизация, документация, оптимизация
@@ -707,7 +702,7 @@ export function createPostData(overrides = {}) {
    - [ ] Slack notifications для failed runs
    - [ ] Coverage badges
 
-**Deliverables**: Стабильные 140-160 тестов, полная документация
+**Deliverables**: Стабильные 135-165 тестов, полная документация, CI/CD оптимизация
 
 ### 7.2 Зависимости и блокеры
 
@@ -938,12 +933,15 @@ test('@P2 @a11y login page is accessible', async ({ page }) => {
 
 ### 11.1 Итоговые цифры
 
-- **Планируемое покрытие**: ~140-160 тестов
+- **Планируемое покрытие**: ~135-165 тестов
+  - P0 (Critical): ~20-30 тестов
+  - P1 (High): ~45-65 тестов
+  - P2 (Medium): ~70 тестов
 - **Время разработки**: 8-10 недель (1 разработчик)
 - **Время выполнения**: 
   - P0: ~5-6 минут
-  - P0+P1: ~15-20 минут
-  - Полный прогон: ~35-50 минут
+  - P0+P1: ~18-23 минут
+  - Полный прогон: ~33-44 минут
 - **Приоритет**: Сначала P0 (критический путь), затем P1 (ядро), затем P2 (расширенное)
 
 ### 11.2 Успех проекта
