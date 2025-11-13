@@ -57,9 +57,15 @@
   - **Модули**: Email Notifications, Billing (complete), Edge Cases & Security
 
 #### 🎯 Фаза 5: Polish & Optimization (Week 9-10)
-- **phase-5-polish.md** - 🔴 TODO
-  - **Цель**: Стабилизация, документация, оптимизация
-  - **Deliverables**: Стабильные тесты, полная документация, CI/CD optimization
+- **[phase-5-polish-optimization.md](./phase-5-polish-optimization.md)** - 🔴 Не начата (план готов)
+  - **Статус**: 🔴 Не начата (ожидание завершения Фазы 4)
+  - **Цель**: Стабилизация, документация, оптимизация (production ready)
+  - **Deliverables**:
+    - 🔴 Flaky tests fixes (< 2% flaky rate)
+    - 🔴 Performance optimization (< 15 мин P0+P1)
+    - 🔴 Полная документация (fixtures, modules, troubleshooting)
+    - 🔴 Monitoring setup (Slack, metrics, badges, Allure optional)
+  - **Цель**: Production-ready тесты, 135-165 stable tests
 
 ## 📊 Общий прогресс
 

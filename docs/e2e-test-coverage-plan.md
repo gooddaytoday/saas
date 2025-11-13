@@ -676,7 +676,8 @@ export function createPostData(overrides = {}) {
 **Deliverables**: ~53 тестов (16 notifications + 15 billing + 22 edge cases), email capture, полное P2 покрытие
 
 #### Фаза 5: Polish & Optimization (Week 9-10)
-**Цель**: Стабилизация, документация, оптимизация
+**Цель**: Стабилизация, документация, оптимизация  
+**📋 Детальный план**: [e2e/plans/phase-5-polish-optimization.md](../e2e/plans/phase-5-polish-optimization.md)
 
 1. **Stabilization**
    - [ ] Flaky tests investigation & fixes
@@ -945,7 +946,7 @@ test('@P2 @a11y login page is accessible', async ({ page }) => {
 - **Приоритет**: Сначала P0 (критический путь), затем P1 (ядро), затем P2 (расширенное)
 
 ### 11.2 Успех проекта
-
+  
 Проект считается успешным, если:
 1. ✅ P0 тесты (20-30) покрывают критический user journey
 2. ✅ P1 тесты (50-70) покрывают все основные функции
