@@ -20,3 +20,4 @@ compiled/
 production-server/
 
 yarn-error.log
+*.tsbuildinfo
