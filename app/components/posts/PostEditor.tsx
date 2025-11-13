@@ -197,10 +197,10 @@ class PostEditor extends React.Component<Props, State> {
     this.setState({ htmlContent: '' });
   };
 
-  public showHtmlContent = async () => {
+  public showHtmlContent = async (): Promise<void> => {
     const { content } = this.props;
 
-    function markdownToHtml(postContent) {
+    function markdownToHtml(postContent: string): string {
       const renderer = new marked.Renderer();
 
       renderer.link = (href, title, text) => {
@@ -222,10 +222,10 @@ class PostEditor extends React.Component<Props, State> {
         breaks: true,
       });
 
-      return marked(he.decode(postContent));
+      return marked.parse(he.decode(postContent)) as string;
     }
 
-    const htmlContent = content ? markdownToHtml(content) : '<span>Nothing to preview.</span>';
+    const htmlContent: string = content ? markdownToHtml(content) : '<span>Nothing to preview.</span>';
     this.setState({ htmlContent });
   };
 

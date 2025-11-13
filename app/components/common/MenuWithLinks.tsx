@@ -17,7 +17,7 @@ type Props = {
 };
 
 type State = {
-  anchorEl: Element | ((element: Element) => Element);
+  anchorEl: Element | (() => Element) | null;
 };
 
 class MenuWithLinks extends React.PureComponent<Props, State> {

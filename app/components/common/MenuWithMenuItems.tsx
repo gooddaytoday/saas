@@ -9,7 +9,7 @@ type Props = {
 };
 
 type State = {
-  menuElem: Element | ((element: Element) => Element);
+  menuElem: Element | (() => Element) | null;
 };
 
 class MenuWithMenuItems extends React.PureComponent<Props, State> {
