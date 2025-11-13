@@ -488,3 +488,8 @@ Refer to [TESTING.md](mdc:app/TESTING.md) for additional examples and details.
 ## Lint errors
 
 When tests have been written, check that there are no eslint or typescript errors. If there are, fix them all.
+
+## Final checks
+
+1. After writing tests, check tha all the tests are passing.
+2. Check that the coverage of the new/changed test's code is at least 80%.

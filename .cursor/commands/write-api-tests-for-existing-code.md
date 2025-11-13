@@ -422,8 +422,8 @@ cd api && yarn test --coverage
 
 ### Step 9: Checklist before completion
 
-- [ ] All tests pass (`cd api && yarn test`)
-- [ ] Coverage ≥ 80% for all metrics (`cd api && yarn test --coverage`)
+- [ ] All tests pass (`cd api && yarn test`) - check that all the tests are passing, it's very important.
+- [ ] Coverage ≥ 80% for all metrics (`cd api && yarn test --coverage`) - check that the coverage of the new/changed test's code is at least 80%.
 - [ ] All conditional branches covered by tests
 - [ ] Edge cases covered by tests (null, undefined, invalid inputs)
 - [ ] Database operations tested with MongoDB Memory Server
