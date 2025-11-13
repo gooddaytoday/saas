@@ -606,7 +606,8 @@ export function createPostData(overrides = {}) {
 **Текущий прогресс**: ~40% (инфраструктура готова, базовые тесты есть, нужны fixtures и реорганизация)
 
 #### Фаза 2: Core Features (Week 3-4)
-**Цель**: P1 функциональность
+**Цель**: P1 функциональность  
+**Детальный план**: [e2e/plans/phase-2-core-features.md](../e2e/plans/phase-2-core-features.md)
 
 1. **Teams Module**
    - [ ] `04-teams/create-team.test.ts`
@@ -632,7 +633,8 @@ export function createPostData(overrides = {}) {
 **Deliverables**: ~40 тестов, расширенные фикстуры
 
 #### Фаза 3: Real-time & Advanced (Week 5-6)
-**Цель**: P1 real-time + P2 начало
+**Цель**: P1 real-time + P2 начало  
+**Детальный план**: [e2e/plans/phase-3-realtime-advanced.md](../e2e/plans/phase-3-realtime-advanced.md)
 
 1. **Real-time Module**
    - [ ] `07-realtime/websocket-connection.test.ts`
