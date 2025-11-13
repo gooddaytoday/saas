@@ -667,5 +667,10 @@ When tests have been written, check that there are no eslint or typescript error
 
 ## Final checks
 
-1. After writing tests, check tha all the tests are passing.
+1. After writing tests, check that:
+
+    - all the tests are passing: `cd app && yarn test`.
+    - there are no eslint errors: `cd app && yarn lint`.
+    - there are no typescript errors: `cd app && yarn type-check`.
+  
 2. Check that the coverage of the new/changed test's code is at least 80%.
