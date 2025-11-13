@@ -369,6 +369,182 @@ test('component renders consistently', () => {
 - **Don't test implementation details**: test user-visible behavior, not internal state (especially for React components)
 - **Don't use React Testing Library queries incorrectly**: use `screen.getByRole`, `getByText` instead of `querySelector`
 
+## **Avoiding React Component Rendering Issues**
+
+### Common Pitfalls and Solutions
+
+When writing unit tests for React components, avoid these common mistakes that lead to console errors and warnings:
+
+#### 1. **setState on Unmounted Components**
+**❌ DON'T: Create component instances without rendering**
+```typescript
+// BAD: Creates component instance without React rendering
+test('bad test', () => {
+  const component = new MyComponent({ prop: 'value' });
+  component.handleChange(); // Warning: Can't call setState on a component that is not yet mounted
+});
+```
+
+**✅ DO: Always render components or test through UI**
+```typescript
+// GOOD: Test through UI interaction
+test('handles user input correctly', async () => {
+  const user = userEvent.setup();
+  const mockOnChange = jest.fn();
+
+  render(<MyComponent onChange={mockOnChange} />);
+
+  const input = screen.getByRole('textbox');
+  await user.type(input, 'test value');
+
+  expect(mockOnChange).toHaveBeenCalledWith('test value');
+});
+
+// GOOD: If testing methods directly, set state manually without setState
+test('validates input correctly', () => {
+  const component = new MyComponent({ onChange: jest.fn() });
+
+  // Set state directly without calling setState
+  Object.defineProperty(component, 'state', {
+    value: { value: 'test' },
+    writable: true
+  });
+
+  const result = component.validateInput();
+  expect(result).toBe(true);
+});
+```
+
+#### 2. **TypeError with Undefined Props**
+**❌ DON'T: Pass undefined props without handling**
+```typescript
+// Component code
+class MyComponent extends React.Component<{ items?: string[] }> {
+  render() {
+    return <div>{this.props.items.map(item => <span>{item}</span>)}</div>; // TypeError if items is undefined
+  }
+}
+
+// Test code
+test('bad test', () => {
+  render(<MyComponent items={undefined} />); // TypeError: Cannot read properties of undefined (reading 'map')
+});
+```
+
+**✅ DO: Handle undefined props in components**
+```typescript
+// Component code
+class MyComponent extends React.Component<{ items?: string[] }> {
+  render() {
+    const { items = [] } = this.props; // Default to empty array
+    return <div>{items.map(item => <span key={item}>{item}</span>)}</div>;
+  }
+}
+
+// Or check explicitly
+class MyComponent extends React.Component<{ items?: string[] }> {
+  render() {
+    const items = this.props.items || []; // Fallback to empty array
+    return <div>{items.map(item => <span key={item}>{item}</span>)}</div>;
+  }
+}
+
+// Test code
+test('handles undefined items gracefully', () => {
+  render(<MyComponent items={undefined} />);
+
+  expect(screen.getByRole('generic')).toBeInTheDocument(); // No error thrown
+  expect(screen.queryByRole('listitem')).not.toBeInTheDocument(); // Empty list
+});
+```
+
+#### 3. **Incomplete Material-UI Component Mocks**
+**❌ DON'T: Mock MUI components without handling all props**
+```typescript
+// BAD: Mock doesn't handle specific props
+jest.mock('@mui/material/Autocomplete', () => {
+  return function MockAutocomplete({ options, value, renderInput }) {
+    return (
+      <div>
+        {renderInput({ params: {} })}
+        {/* Missing: isOptionEqualToValue, filterSelectedOptions, noOptionsText, etc. */}
+      </div>
+    );
+  };
+});
+
+// Results in React warnings: "React does not recognize the `isOptionEqualToValue` prop"
+```
+
+**✅ DO: Mock all props used by components**
+```typescript
+// GOOD: Handle all props to avoid DOM attribute warnings
+jest.mock('@mui/material/Autocomplete', () => {
+  return function MockAutocomplete({
+    options,
+    value,
+    renderInput,
+    getOptionLabel,
+    isOptionEqualToValue,    // Accept but don't use in mock
+    filterSelectedOptions,   // Accept but don't use in mock
+    noOptionsText,           // Accept and use in mock
+    onChange,
+    multiple,
+    id,
+    ...props                 // Spread remaining props
+  }: any) {
+    return (
+      <div data-testid="autocomplete" {...props}>
+        {renderInput({ params: { InputProps: {}, inputProps: {} } })}
+        <div data-testid="options">
+          {options?.map((option: any, index: number) => (
+            <div
+              key={option.id}
+              data-testid={`option-${index}`}
+              onClick={() => onChange?.(null, multiple ? [option] : option)}
+            >
+              {getOptionLabel?.(option) || option}
+            </div>
+          ))}
+        </div>
+        {noOptionsText && options?.length === 0 && (
+          <div data-testid="no-options">{noOptionsText}</div>
+        )}
+      </div>
+    );
+  };
+});
+```
+
+#### 4. **Testing Internal Component Methods**
+**❌ DON'T: Test private methods directly**
+```typescript
+// BAD: Testing implementation details
+test('internal validation logic', () => {
+  const component = new MyComponent({});
+  const result = component.validateInput('test'); // Testing private method
+  expect(result).toBe(true);
+});
+```
+
+**✅ DO: Test behavior through public interface**
+```typescript
+// GOOD: Test what user sees and interacts with
+test('shows validation error for invalid input', async () => {
+  const user = userEvent.setup();
+  render(<MyForm />);
+
+  const input = screen.getByRole('textbox');
+  const submitButton = screen.getByRole('button', { name: /submit/i });
+
+  await user.type(input, 'invalid-input');
+  await user.click(submitButton);
+
+  expect(screen.getByText('Invalid input')).toBeInTheDocument();
+  expect(screen.getByRole('textbox')).toHaveAttribute('aria-invalid', 'true');
+});
+```
+
 ## **Element Queries (Priority)**
 
 1. **getByRole** - most accessible approach
