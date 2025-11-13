@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+yarn type-check
 yarn lint-staged
 yarn test:api
 yarn test:app
