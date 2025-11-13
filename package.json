@@ -6,6 +6,9 @@
     "prepare": "husky install",
     "secretlint": "secretlint \"**/*\"",
     "secretlint:fix": "secretlint \"**/*\" --fix",
+    "test": "yarn test:api && yarn test:app",
+    "test:api": "cd api && yarn test",
+    "test:app": "cd app && yarn test",
     "test:e2e": "cd e2e && playwright test",
     "test:e2e:headed": "cd e2e && playwright test --headed",
     "test:e2e:debug": "cd e2e && PWDEBUG=1 playwright test --debug",
@@ -32,5 +35,6 @@
   },
   "lint-staged": {
     "**/*": ["secretlint"]
-  }
+  },
+  "_comment": "Pre-commit hooks run lint-staged (secretlint) + API & App unit tests"
 }

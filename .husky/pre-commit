@@ -1,2 +1,4 @@
 #!/usr/bin/env bash
-exec yarn lint-staged
+yarn lint-staged
+yarn test:api
+yarn test:app

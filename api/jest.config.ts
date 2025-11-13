@@ -15,6 +15,7 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
   verbose: true,
+  testTimeout: 30000, // Increase timeout for MongoDB Memory Server setup
 };
 
 export default config;
