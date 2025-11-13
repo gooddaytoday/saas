@@ -577,31 +577,33 @@ export function createPostData(overrides = {}) {
 ### 7.1 Фазы реализации
 
 #### Фаза 1: Foundation (Week 1-2)
-**Цель**: Базовая инфраструктура + P0 тесты
+**Цель**: Базовая инфраструктура + P0 тесты  
+**📋 Детальный план**: [e2e/plans/phase-1-foundation.md](../e2e/plans/phase-1-foundation.md)
 
 1. **Setup & Infrastructure**
    - [x] MongoDB Memory Server (готово)
    - [x] Server lifecycle management (готово)
    - [ ] Базовые фикстуры (`authSession`, `teamContext`)
-   - [ ] Data factories (User, Team, Discussion, Post)
-   - [ ] Базовые helpers (waitForResponse, getAuthCookie)
+   - [ ] Data factories (User, Team, Discussion, Post) - частично готово
+   - [ ] Базовые helpers (waitForResponse, getAuthCookie) - частично готово
 
 2. **P0: Smoke Tests**
-   - [ ] `01-smoke/servers.test.ts`
-   - [ ] `01-smoke/basic-pages.test.ts`
+   - [ ] `01-smoke/servers.test.ts` (5-7 тестов)
+   - [ ] `01-smoke/basic-pages.test.ts` (8-10 тестов)
 
 3. **P0: Auth Tests**
-   - [ ] `02-auth/passwordless.test.ts` (приоритет 1)
-   - [ ] `02-auth/session.test.ts`
-   - [ ] `02-auth/logout.test.ts`
-   - [ ] `02-auth/google-oauth.test.ts` (требует Google test credentials)
+   - [ ] `02-auth/passwordless.test.ts` (8-10 тестов, приоритет 1)
+   - [ ] `02-auth/session.test.ts` (6-8 тестов)
+   - [ ] `02-auth/logout.test.ts` (3-5 тестов)
+   - [ ] `02-auth/google-oauth.test.ts` (4-6 тестов, требует Google test credentials)
 
 4. **P0: Onboarding Tests**
-   - [ ] `03-onboarding/first-login.test.ts`
-   - [ ] `03-onboarding/create-first-team.test.ts`
-   - [ ] `03-onboarding/profile-setup.test.ts`
+   - [ ] `03-onboarding/first-login.test.ts` (3-5 тестов)
+   - [ ] `03-onboarding/create-first-team.test.ts` (4-6 тестов)
+   - [ ] `03-onboarding/profile-setup.test.ts` (3-5 тестов)
 
-**Deliverables**: ~20 тестов, базовые фикстуры, CI интеграция для P0
+**Deliverables**: 40-56 тестов, базовые фикстуры, CI интеграция для P0  
+**Текущий прогресс**: ~40% (инфраструктура готова, базовые тесты есть, нужны fixtures и реорганизация)
 
 #### Фаза 2: Core Features (Week 3-4)
 **Цель**: P1 функциональность

@@ -95,6 +95,25 @@ tests/
     └── login.test.ts       # Authentication flow tests
 ```
 
+## Test Planning & Roadmap
+
+**Comprehensive Test Coverage Strategy**: See [docs/e2e-test-coverage-plan.md](../docs/e2e-test-coverage-plan.md) for the complete 140-160 test coverage plan across 5 phases.
+
+**Detailed Phase Plans**:
+- **[Phase 1: Foundation](./plans/phase-1-foundation.md)** (Week 1-2) - 🟡 In Progress (~40%)
+  - Infrastructure (✅ Done), Fixtures (🔴 TODO), P0 Tests (🔴 TODO)
+  - Deliverables: 40-56 tests, `authSession` & `teamContext` fixtures
+- **Phase 2: Core Features** (Week 3-4) - 🔴 Not Started
+  - Teams, Discussions, Posts modules
+- **Phase 3: Real-time** (Week 5-6) - 🔴 Not Started
+  - WebSockets, Billing, User Settings
+- **Phase 4: Extended** (Week 7-8) - 🔴 Not Started
+  - Notifications, Billing completion, Edge Cases
+- **Phase 5: Polish** (Week 9-10) - 🔴 Not Started
+  - Stabilization, Documentation, Optimization
+
+**Progress Overview**: See [plans/README.md](./plans/README.md) for current status and next steps.
+
 ## Fixtures
 
 ### Base Fixtures
