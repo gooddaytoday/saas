@@ -10,12 +10,13 @@ services:
       - CI=true
       - E2E_API_PORT=8000
       - E2E_APP_PORT=3000
+      - E2E_API_URL=http://localhost:8000
+      - E2E_APP_URL=http://localhost:3000
+      - SESSION_SECRET=test-docker-session-secret-key-2024
+      - JWT_SECRET=test-docker-jwt-secret-key-2024
+      - COOKIE_DOMAIN=localhost
+      - MONGO_URL_TEST=
     volumes:
-      - ../:/app
-      - /app/node_modules
-      - /app/api/node_modules
-      - /app/app/node_modules
-      - /app/e2e/node_modules
       - ./playwright-report:/app/e2e/playwright-report
       - ./test-results:/app/e2e/test-results
     command: yarn test:e2e
