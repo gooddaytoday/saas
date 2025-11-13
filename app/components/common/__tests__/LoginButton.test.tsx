@@ -12,7 +12,7 @@ import notify from '../../../lib/notify';
 import { makeQueryString } from '../../../lib/api/makeQueryString';
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import LoginButton from '../LoginButton';
 
@@ -78,7 +78,6 @@ describe('LoginButton', () => {
       );
     });
 
-
     test('renders Google login button without query string when makeQueryString returns empty', () => {
       // Arrange - default mock returns ''
 
@@ -89,7 +88,6 @@ describe('LoginButton', () => {
       const googleButton = screen.getByRole('link', { name: /log in with google/i });
       expect(googleButton).toHaveAttribute('href', 'http://localhost:3001/auth/google');
     });
-
 
     test('renders disabled email form elements', () => {
       // Arrange & Act
@@ -107,18 +105,27 @@ describe('LoginButton', () => {
   });
 
   describe('User Interactions', () => {
-
     test('handles form submission with valid email', async () => {
       // Arrange - default mocks are set up in beforeEach
+      render(<LoginButton />);
 
-      // Test the onSubmit method directly since UI is disabled
+      // Since UI is disabled, we test that the component renders correctly
+      // and doesn't crash when attempting to interact (even though inputs are disabled)
+      expect(screen.getByRole('textbox', { name: /email address/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /log in with email/i })).toBeDisabled();
+
+      // Test the onSubmit logic directly by creating component instance
+      // but without calling setState on unmounted component
       const loginComponent = new LoginButton({});
+      const mockEvent = { preventDefault: jest.fn() } as any;
 
-      // Set up component with test state
-      (loginComponent as any).state = { email: 'test@example.com' };
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: 'test@example.com' },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -135,9 +142,14 @@ describe('LoginButton', () => {
 
       // Act - Test method directly
       const loginComponent = new LoginButton({ invitationToken: 'token123' });
-      (loginComponent as any).state = { email: 'test@example.com' };
-
       const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: 'test@example.com' },
+        writable: true,
+      });
+
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -150,10 +162,15 @@ describe('LoginButton', () => {
     test('shows error notification when email is empty', async () => {
       // Arrange
       const loginComponent = new LoginButton({});
-      (loginComponent as any).state = { email: '' };
+      const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: '' },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -168,10 +185,15 @@ describe('LoginButton', () => {
       (emailLoginLinkApiMethod as jest.Mock).mockRejectedValue(testError);
 
       const loginComponent = new LoginButton({});
-      (loginComponent as any).state = { email: 'test@example.com' };
+      const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: 'test@example.com' },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -186,10 +208,15 @@ describe('LoginButton', () => {
       // Arrange - default mocks are set up in beforeEach
 
       const loginComponent = new LoginButton({ invitationToken: 'token123' });
-      (loginComponent as any).state = { email: 'test@example.com' };
+      const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: 'test@example.com' },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -241,10 +268,15 @@ describe('LoginButton', () => {
     test('handles null email state gracefully', async () => {
       // Arrange
       const loginComponent = new LoginButton({});
-      (loginComponent as any).state = { email: null };
+      const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: null },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -255,10 +287,15 @@ describe('LoginButton', () => {
     test('handles undefined email state gracefully', async () => {
       // Arrange
       const loginComponent = new LoginButton({});
-      (loginComponent as any).state = { email: undefined };
+      const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: undefined },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert
@@ -269,10 +306,15 @@ describe('LoginButton', () => {
     test('handles whitespace-only email as valid input', async () => {
       // Arrange - JavaScript considers whitespace string as truthy
       const loginComponent = new LoginButton({});
-      (loginComponent as any).state = { email: '   ' };
+      const mockEvent = { preventDefault: jest.fn() } as any;
+
+      // Manually set state without using setState
+      Object.defineProperty(loginComponent, 'state', {
+        value: { email: '   ' },
+        writable: true,
+      });
 
       // Act
-      const mockEvent = { preventDefault: jest.fn() } as any;
       await (loginComponent as any).onSubmit(mockEvent);
 
       // Assert - whitespace is considered valid input, so API should be called

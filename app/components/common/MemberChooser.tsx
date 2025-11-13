@@ -21,14 +21,17 @@ class MemberChooser extends React.Component<Props, State> {
   constructor(props) {
     super(props);
 
-    const suggestions = this.props.members.map((user) => ({
-      label: user.displayName || user.email,
-      id: user._id,
-    }));
-
-    const selectedItems = this.props.selectedMemberIds
-      ? suggestions.filter((s) => this.props.selectedMemberIds.indexOf(s.id) !== -1)
+    const suggestions = this.props.members
+      ? this.props.members.map((user) => ({
+          label: user.displayName || user.email,
+          id: user._id,
+        }))
       : [];
+
+    const selectedItems =
+      this.props.selectedMemberIds && suggestions.length > 0
+        ? suggestions.filter((s) => this.props.selectedMemberIds.indexOf(s.id) !== -1)
+        : [];
 
     this.state = {
       selectedItems: selectedItems,
@@ -36,10 +39,12 @@ class MemberChooser extends React.Component<Props, State> {
   }
 
   public render() {
-    const suggestions = this.props.members.map((user) => ({
-      label: user.displayName || user.email,
-      id: user._id,
-    }));
+    const suggestions = this.props.members
+      ? this.props.members.map((user) => ({
+          label: user.displayName || user.email,
+          id: user._id,
+        }))
+      : [];
 
     return (
       <Autocomplete
@@ -58,7 +63,6 @@ class MemberChooser extends React.Component<Props, State> {
           />
         )}
         onChange={this.handleChange}
-        filterSelectedOptions={true}
         noOptionsText="No team members to select from"
       />
     );

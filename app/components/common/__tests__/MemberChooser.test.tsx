@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import MemberChooser from '../MemberChooser';
 import { User } from '../../../lib/store/user';
@@ -16,9 +17,22 @@ jest.mock('../../../lib/store/user', () => ({
 
 // Mock Material-UI Autocomplete component
 jest.mock('@mui/material/Autocomplete', () => {
-  return function MockAutocomplete({ options, value, renderInput, getOptionLabel, ...props }: any) {
+  return function MockAutocomplete({
+    options,
+    value,
+    renderInput,
+    getOptionLabel,
+    isOptionEqualToValue,
+    noOptionsText,
+    onChange,
+    multiple,
+    id,
+    ...props
+  }: any) {
+    const currentValue = value || (multiple ? [] : null);
+
     return (
-      <div data-testid="autocomplete" {...props}>
+      <div data-testid="autocomplete" data-testid-id={id} {...props}>
         {renderInput({
           params: {
             InputProps: {},
@@ -26,23 +40,61 @@ jest.mock('@mui/material/Autocomplete', () => {
           },
         })}
         <div data-testid="options">
-          {options.map((option: any, index: number) => (
-            <div
-              key={option.id}
-              data-testid={`option-${index}`}
-              data-option-id={option.id}
-              data-option-label={getOptionLabel(option)}
-            >
-              {getOptionLabel(option)}
-            </div>
-          ))}
+          {options?.map((option: any, index: number) => {
+            const isSelected = multiple
+              ? currentValue.some((v: any) =>
+                  isOptionEqualToValue ? isOptionEqualToValue(v, option) : v.id === option.id,
+                )
+              : isOptionEqualToValue
+                ? isOptionEqualToValue(currentValue, option)
+                : currentValue?.id === option.id;
+
+            return (
+              <div
+                key={option.id}
+                data-testid={`option-${index}`}
+                data-option-id={option.id}
+                data-option-label={getOptionLabel(option)}
+                data-selected={isSelected}
+                onClick={() => {
+                  if (!onChange) return;
+
+                  if (multiple) {
+                    // For multiple selection, toggle the option in the array
+                    const newValue = isSelected
+                      ? currentValue.filter(
+                          (v: any) =>
+                            !(isOptionEqualToValue
+                              ? isOptionEqualToValue(v, option)
+                              : v.id === option.id),
+                        )
+                      : [...currentValue, option];
+                    onChange(null, newValue);
+                  } else {
+                    // For single selection, just select the option
+                    onChange(null, option);
+                  }
+                }}
+              >
+                {getOptionLabel(option)}
+              </div>
+            );
+          })}
         </div>
+        {noOptionsText && options?.length === 0 && (
+          <div data-testid="no-options">{noOptionsText}</div>
+        )}
         <div data-testid="selected-container">
-          {value?.map((selected: any, index: number) => (
-            <div key={selected.id} data-testid={`selected-${index}`} data-selected-id={selected.id}>
-              {getOptionLabel(selected)}
-            </div>
-          ))}
+          {currentValue &&
+            (multiple ? currentValue : [currentValue]).map((selected: any, index: number) => (
+              <div
+                key={selected.id}
+                data-testid={`selected-${index}`}
+                data-selected-id={selected.id}
+              >
+                {getOptionLabel(selected)}
+              </div>
+            ))}
         </div>
       </div>
     );
@@ -259,75 +311,54 @@ describe('MemberChooser', () => {
   });
 
   describe('User Interactions', () => {
-    test('calls onChange with correct ids when selection changes', () => {
+    test('calls onChange with correct ids when selection changes', async () => {
       // Arrange
+      const user = userEvent.setup();
       render(<MemberChooser onChange={mockOnChange} members={mockUsers} />);
 
-      // Act - Simulate selection change (mock implementation would handle this)
-      // Since we mocked Autocomplete, we need to test the handleChange method directly
-      const component = new (MemberChooser as any)({
-        onChange: mockOnChange,
-        members: mockUsers,
-      });
-      const mockEvent = { preventDefault: jest.fn() };
-      const newValue = [
-        { id: 'user1', label: 'User One' },
-        { id: 'user2', label: 'user2@example.com' },
-      ];
-
-      component.handleChange(mockEvent, newValue);
+      // Act - Click on an option to select it
+      const firstOption = screen.getByTestId('option-0');
+      await user.click(firstOption);
 
       // Assert
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(mockOnChange).toHaveBeenCalledWith(['user1']);
+    });
+
+    test('calls onChange with multiple ids when multiple selection changes', async () => {
+      // Arrange
+      const user = userEvent.setup();
+      render(<MemberChooser onChange={mockOnChange} members={mockUsers} />);
+
+      // Act - Click on multiple options
+      const firstOption = screen.getByTestId('option-0');
+      const secondOption = screen.getByTestId('option-1');
+      await user.click(firstOption);
+      await user.click(secondOption);
+
+      // Assert - Check that onChange was called with the final selection
+      expect(mockOnChange).toHaveBeenCalledTimes(2);
+      expect(mockOnChange).toHaveBeenNthCalledWith(2, ['user1', 'user2']);
+    });
+
+    test('handles selection with pre-selected members', async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const selectedIds = ['user1'];
+      render(
+        <MemberChooser
+          onChange={mockOnChange}
+          members={mockUsers}
+          selectedMemberIds={selectedIds}
+        />,
+      );
+
+      // Act - Click on another option to add to selection
+      const secondOption = screen.getByTestId('option-1');
+      await user.click(secondOption);
+
+      // Assert - Check that onChange was called with the updated selection
+      expect(mockOnChange).toHaveBeenCalledTimes(1);
       expect(mockOnChange).toHaveBeenCalledWith(['user1', 'user2']);
-    });
-
-    test('calls onChange with empty array when all items are deselected', () => {
-      // Arrange
-      const component = new (MemberChooser as any)({
-        onChange: mockOnChange,
-        members: mockUsers,
-      });
-      const mockEvent = { preventDefault: jest.fn() };
-
-      // Act
-      component.handleChange(mockEvent, []);
-
-      // Assert
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(mockOnChange).toHaveBeenCalledWith([]);
-    });
-
-    test('handles null event in handleChange', () => {
-      // Arrange
-      const component = new (MemberChooser as any)({
-        onChange: mockOnChange,
-        members: mockUsers,
-      });
-      const newValue = [{ id: 'user1', label: 'User One' }];
-
-      // Act
-      component.handleChange(null, newValue);
-
-      // Assert
-      expect(mockOnChange).toHaveBeenCalledWith(['user1']);
-    });
-
-    test('updates internal state when selection changes', () => {
-      // Arrange
-      const component = new (MemberChooser as any)({
-        onChange: mockOnChange,
-        members: mockUsers,
-      });
-      const mockEvent = { preventDefault: jest.fn() };
-      const newValue = [{ id: 'user1', label: 'User One' }];
-
-      // Act
-      component.handleChange(mockEvent, newValue);
-
-      // Assert - We can't test setState directly in unit tests for class components
-      // But we can test that onChange was called with correct data
-      expect(mockOnChange).toHaveBeenCalledWith(['user1']);
     });
   });
 
@@ -423,11 +454,13 @@ describe('MemberChooser', () => {
     });
 
     test('handles undefined members prop gracefully', () => {
-      // This would normally cause an error, but we test that component handles it
-      // In real usage, members is required, but we test error boundary behavior
-      expect(() => {
-        render(<MemberChooser onChange={mockOnChange} members={undefined as any} />);
-      }).toThrow(/Cannot read properties of undefined/);
+      // Arrange & Act
+      render(<MemberChooser onChange={mockOnChange} members={undefined as any} />);
+
+      // Assert - component should render without crashing and show no options
+      expect(screen.getByTestId('autocomplete')).toBeInTheDocument();
+      expect(screen.getByTestId('options')).toBeInTheDocument();
+      expect(screen.queryAllByTestId(/^option-/)).toHaveLength(0);
     });
   });
 

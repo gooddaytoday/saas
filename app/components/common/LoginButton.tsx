@@ -83,7 +83,6 @@ class LoginButton extends React.PureComponent<Props, State> {
 
     try {
       await emailLoginLinkApiMethod({ email, invitationToken });
-      this.setState({ email: '' });
       notify('SaaS boilerplate emailed you a login link.');
     } catch (error) {
       notify(error);

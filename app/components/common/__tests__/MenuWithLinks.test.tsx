@@ -47,8 +47,8 @@ jest.mock('next/router', () => {
 import MenuWithLinks from '../MenuWithLinks';
 
 // Get reference to the actual mock function
-const actualMockRouter = require('next/router') as any;
-mockRouterPush = actualMockRouter.__pushMock;
+import * as actualMockRouter from 'next/router';
+mockRouterPush = (actualMockRouter as any).__pushMock;
 
 // Mock window.location for external links
 const mockLocation = {
@@ -95,32 +95,20 @@ describe('MenuWithLinks', () => {
   });
 
   describe('Rendering', () => {
-  test('renders without errors with minimal props', () => {
-    render(
-      <MenuWithLinks options={[]} >
-        {mockChildren}
-      </MenuWithLinks>
-    );
+    test('renders without errors with minimal props', () => {
+      render(<MenuWithLinks options={[]}>{mockChildren}</MenuWithLinks>);
 
-    expect(screen.getByText('Menu Button')).toBeInTheDocument();
-  });
+      expect(screen.getByText('Menu Button')).toBeInTheDocument();
+    });
 
     test('renders children correctly', () => {
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       expect(screen.getByText('Menu Button')).toBeInTheDocument();
     });
 
     test('menu is initially closed', () => {
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       // Menu should not be visible initially
       expect(screen.queryByRole('menu')).not.toBeInTheDocument();
@@ -128,11 +116,7 @@ describe('MenuWithLinks', () => {
 
     test('renders all menu options when menu is open', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       // Open menu
       await user.click(screen.getByText('Menu Button'));
@@ -147,11 +131,7 @@ describe('MenuWithLinks', () => {
   describe('Menu Interactions', () => {
     test('opens menu on button click', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
@@ -162,11 +142,7 @@ describe('MenuWithLinks', () => {
 
     test('menu remains open when clicking outside (Material-UI default behavior)', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       // Open menu
       await user.click(screen.getByText('Menu Button'));
@@ -181,11 +157,7 @@ describe('MenuWithLinks', () => {
 
     test('handles keyboard events for opening menu', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       const menuButton = screen.getByText('Menu Button');
 
@@ -227,11 +199,7 @@ describe('MenuWithLinks', () => {
         },
       ];
 
-      render(
-        <MenuWithLinks options={optionsWithSeparator} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={optionsWithSeparator}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
@@ -242,11 +210,7 @@ describe('MenuWithLinks', () => {
 
     test('handles external server links correctly', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
@@ -259,11 +223,7 @@ describe('MenuWithLinks', () => {
 
     test('handles external link clicks', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
       expect(screen.getByText('External')).toBeInTheDocument();
@@ -278,11 +238,7 @@ describe('MenuWithLinks', () => {
   describe('Navigation', () => {
     test('navigates using Next.js Router for internal links', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
       await user.click(screen.getByText('Home'));
@@ -293,11 +249,7 @@ describe('MenuWithLinks', () => {
 
     test('menu remains open after internal navigation', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
       expect(screen.getByText('Home')).toBeInTheDocument();
@@ -332,11 +284,7 @@ describe('MenuWithLinks', () => {
         },
       ];
 
-      render(
-        <MenuWithLinks options={optionsWithActive} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={optionsWithActive}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
@@ -351,18 +299,14 @@ describe('MenuWithLinks', () => {
 
     test('applies correct font size to menu items', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
       const menuItems = screen.getAllByRole('menuitem');
       // Check that at least one item has the expected fontSize (Material-UI may override styles)
-      const hasCorrectFontSize = menuItems.some(item =>
-        item.style.fontSize === '14px' || getComputedStyle(item).fontSize === '14px'
+      const hasCorrectFontSize = menuItems.some(
+        (item) => item.style.fontSize === '14px' || getComputedStyle(item).fontSize === '14px',
       );
       expect(hasCorrectFontSize).toBe(true);
     });
@@ -370,11 +314,7 @@ describe('MenuWithLinks', () => {
 
   describe('Edge Cases', () => {
     test('handles empty options array', () => {
-      render(
-        <MenuWithLinks options={[]} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={[]}>{mockChildren}</MenuWithLinks>);
 
       expect(screen.getByText('Menu Button')).toBeInTheDocument();
     });
@@ -392,11 +332,7 @@ describe('MenuWithLinks', () => {
         },
       ];
 
-      render(
-        <MenuWithLinks options={optionsWithEmptyHref} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={optionsWithEmptyHref}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
       await user.click(screen.getByText('Empty Link'));
@@ -412,11 +348,7 @@ describe('MenuWithLinks', () => {
         </div>
       );
 
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {complexChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{complexChildren}</MenuWithLinks>);
 
       expect(screen.getByText('Complex')).toBeInTheDocument();
       expect(screen.getByText('Button')).toBeInTheDocument();
@@ -425,11 +357,7 @@ describe('MenuWithLinks', () => {
 
   describe('Accessibility', () => {
     test('has correct ARIA attributes when menu is closed', () => {
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       const menuTrigger = screen.getByText('Menu Button').parentElement;
       expect(menuTrigger).toHaveAttribute('aria-haspopup', 'true');
@@ -437,11 +365,7 @@ describe('MenuWithLinks', () => {
 
     test('updates ARIA attributes when menu is open', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
@@ -452,11 +376,7 @@ describe('MenuWithLinks', () => {
 
     test('menu has correct role when open', async () => {
       const user = userEvent.setup();
-      render(
-        <MenuWithLinks options={mockOptions} >
-          {mockChildren}
-        </MenuWithLinks>
-      );
+      render(<MenuWithLinks options={mockOptions}>{mockChildren}</MenuWithLinks>);
 
       await user.click(screen.getByText('Menu Button'));
 
