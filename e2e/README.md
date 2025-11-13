@@ -103,8 +103,9 @@ tests/
 - **[Phase 1: Foundation](./plans/phase-1-foundation.md)** (Week 1-2) - 🟡 In Progress (~40%)
   - Infrastructure (✅ Done), Fixtures (🔴 TODO), P0 Tests (🔴 TODO)
   - Deliverables: 40-56 tests, `authSession` & `teamContext` fixtures
-- **Phase 2: Core Features** (Week 3-4) - 🔴 Not Started
-  - Teams, Discussions, Posts modules
+- **[Phase 2: Core Features](./plans/phase-2-core-features.md)** (Week 3-4) - 🔴 Not Started (Plan Ready ✅)
+  - Teams, Discussions, Posts modules (50-70 tests)
+  - Deliverables: `discussionContext` fixture, P1 tests, CI/CD integration
 - **Phase 3: Real-time** (Week 5-6) - 🔴 Not Started
   - WebSockets, Billing, User Settings
 - **Phase 4: Extended** (Week 7-8) - 🔴 Not Started

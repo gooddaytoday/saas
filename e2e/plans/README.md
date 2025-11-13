@@ -21,8 +21,14 @@
     - 🔴 Onboarding tests (10-16 тестов)
 
 #### 🔄 Фаза 2: Core Features (Week 3-4)
-- **phase-2-core-features.md** - 🔴 TODO
+- **[phase-2-core-features.md](./phase-2-core-features.md)** - 🔴 Не начата (план готов)
+  - **Статус**: 🔴 Не начата (ожидание завершения Фазы 1)
   - **Цель**: P1 функциональность (50-70 тестов)
+  - **Deliverables**:
+    - 🔴 `discussionContext` fixture
+    - 🔴 Teams module (15 тестов)
+    - 🔴 Discussions module (18 тестов)
+    - 🔴 Posts module (12-17 тестов)
   - **Модули**: Teams, Discussions, Posts
 
 #### 🌐 Фаза 3: Real-time & Advanced (Week 5-6)
