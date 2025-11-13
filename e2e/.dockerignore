@@ -1,0 +1,37 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Test results
+test-results/
+playwright-report/
+junit.xml
+test-results.json
+
+# Environment files
+.env
+.env.local
+.env.test
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Temporary files
+*.tmp
+*.log

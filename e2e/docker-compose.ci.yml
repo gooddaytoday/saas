@@ -10,6 +10,12 @@ services:
       - CI=true
       - E2E_API_PORT=8000
       - E2E_APP_PORT=3000
+      - E2E_API_URL=http://localhost:8000
+      - E2E_APP_URL=http://localhost:3000
+      - SESSION_SECRET=test-ci-session-secret-key-2024
+      - JWT_SECRET=test-ci-jwt-secret-key-2024
+      - COOKIE_DOMAIN=localhost
+      - MONGO_URL_TEST=
     command: yarn test:e2e:ci
     networks:
       - e2e-network
