@@ -798,11 +798,11 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
 
 ### Week 1: Fixtures & Smoke Tests
 
-- [ ] **Day 1-2**: Создать `authSession` fixture (Задача 2.1)
-  - [ ] Реализовать базовый fixture
-  - [ ] Добавить параметры (withTeam, teamRole)
-  - [ ] Тестировать fixture отдельно
-  - [ ] Документировать usage
+- [x] **Day 1-2**: Создать `authSession` fixture (Задача 2.1) ✅ **COMPLETED**
+  - [x] Реализовать базовый fixture (implemented as helper function)
+  - [x] Добавить параметры (withTeam, teamRole)
+  - [x] Тестировать fixture отдельно (10/10 tests passing)
+  - [x] Документировать usage (README + examples + summary)
 
 - [ ] **Day 3**: Создать `teamContext` fixture (Задача 2.2)
   - [ ] Реализовать fixture
