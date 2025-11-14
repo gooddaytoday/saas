@@ -3,7 +3,7 @@
 > **Период**: Week 1-2  
 > **Цель**: Базовая инфраструктура + P0 критические тесты  
 > **Статус**: 🟡 В процессе  
-> **Прогресс**: ~40% (инфраструктура готова, нужны тесты и fixtures)
+> **Прогресс**: ~50% (инфраструктура ✅, fixtures ✅, осталось: smoke tests + auth reorg + onboarding)
 
 ---
 
@@ -57,18 +57,19 @@
 
 ### ❌ Что ОТСУТСТВУЕТ для завершения Фазы 1
 
-#### Fixtures (50%)
-- [ ] **`authSession` fixture** - Расширенная версия `authFixtures.ts`
+#### Fixtures (100%) ✅ **COMPLETED**
+- [x] **`createAuthSession()` helper** - Реализован в `helpers.ts`
   - Автоматический логин пользователя
   - Support разных типов пользователей (с командой / без команды)
   - Настройка session cookies
-- [ ] **`teamContext` fixture** - Новый файл
+- [x] **`createTeamContext()` helper** - Реализован в `helpers.ts`
   - Создание команды с участниками
   - Настройка ролей (leader/member)
   - Invitation tokens
-- [ ] **Интеграция fixtures** - `fixtures/index.ts`
-  - Экспорт всех fixtures
-  - Правильная композиция
+- [x] **Централизованный export** - `fixtures/index.ts`
+  - Экспорт всех helpers и utilities
+  - Стандартный test/expect из @playwright/test
+  - Полная документация (fixtures/README.md)
 
 #### Тесты P0 (40%)
 - [ ] **Smoke tests** - Расширение `tests/01-smoke/`
@@ -109,9 +110,9 @@
 
 | # | Задача | Статус | Файлы | Приоритет |
 |---|--------|--------|-------|-----------|
-| 2.1 | Создать `authSession` fixture | 🔴 TODO | `fixtures/authSession.fixture.ts` | **P0 - HIGH** |
-| 2.2 | Создать `teamContext` fixture | 🔴 TODO | `fixtures/teamContext.fixture.ts` | **P0 - HIGH** |
-| 2.3 | Обновить `fixtures/index.ts` | 🔴 TODO | `fixtures/index.ts` | **P0 - MEDIUM** |
+| 2.1 | Создать `authSession` fixture | ✅ Готово | `helpers.ts` (as helper function) | **P0 - HIGH** |
+| 2.2 | Создать `teamContext` fixture | ✅ Готово | `helpers.ts` (as helper function) | **P0 - HIGH** |
+| 2.3 | Обновить `fixtures/index.ts` | ✅ Готово | `fixtures/index.ts` | **P0 - MEDIUM** |
 | 2.4 | Добавить `waitForResponse` helper | 🔴 TODO | `utils/apiHelpers.ts` | **P1 - LOW** |
 
 ### 2.3 P0: Smoke Tests (TODO 🔴)
@@ -810,10 +811,10 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
   - [x] Тестировать fixture (15 comprehensive tests)
   - [x] Документировать (README with usage examples)
 
-- [ ] **Day 4**: Обновить `fixtures/index.ts` (Задача 2.3)
-  - [ ] Экспортировать новые fixtures
-  - [ ] Создать composed test instance
-  - [ ] Обновить документацию
+- [x] **Day 4**: Обновить `fixtures/index.ts` (Задача 2.3) ✅ **COMPLETED**
+  - [x] Экспортировать все helpers и utilities
+  - [x] Создать централизованный export point
+  - [x] Обновить документацию (fixtures/README.md, e2e/README.md)
 
 - [ ] **Day 5**: Smoke tests (Задачи 3.1, 3.2)
   - [ ] Создать `01-smoke/servers.test.ts` (5-7 тестов)
@@ -854,11 +855,11 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
 
 ✅ **Фаза 1 считается завершенной, если:**
 
-1. **Fixtures реализованы** (100%)
-   - [x] `authSession` fixture работает
-   - [x] `teamContext` fixture работает
-   - [x] `fixtures/index.ts` экспортирует все
-   - [x] Документация по usage
+1. **Fixtures реализованы** (100%) ✅ **COMPLETED**
+   - [x] `createAuthSession()` helper работает
+   - [x] `createTeamContext()` helper работает
+   - [x] `fixtures/index.ts` централизованный export point создан
+   - [x] Документация по usage (fixtures/README.md, e2e/README.md)
 
 2. **P0 Smoke tests** (13-17 тестов)
    - [x] `01-smoke/servers.test.ts` (5-7 тестов) проходят

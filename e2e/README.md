@@ -117,12 +117,23 @@ tests/
 
 ## Fixtures and Helpers
 
-### Base Helpers
+### Centralized Import
+
+All helpers and utilities are exported from a single location for convenience:
+
+```typescript
+import { test, expect } from './fixtures';
+import { getServers, getTestDb, createAuthSession, createTeamContext } from './fixtures';
+```
+
+**See [fixtures/README.md](./fixtures/README.md) for complete documentation and usage patterns.**
+
+### Core Helpers
 
 - **`getServers()`**: Returns API and App server URLs
 - **`getTestDb()`**: Returns database utilities (clear collections)
 - **`createAuthSession()`**: Creates authenticated user session
-- **`createTeamContext()`**: Creates complete team context with owner, members, and invitations (NEW!)
+- **`createTeamContext()`**: Creates complete team context with owner, members, and invitations
 
 ### Auth Session Helper
 
@@ -274,12 +285,17 @@ test('complete team', async ({ page }) => {
 });
 ```
 
-### Legacy Fixtures (deprecated, use helpers instead)
+### Recommended Test Pattern
 
 ```typescript
-import { test, expect } from '../fixtures';
+import { test, expect } from './fixtures';
+import { getServers, getTestDb } from './fixtures';
 
-test('should do something', async ({ page, servers, testDb }) => {
+test('should do something', async ({ page }) => {
+  // Get servers and database
+  const servers = await getServers();
+  const testDb = await getTestDb();
+  
   // Clear database before test
   await testDb.clear();
   
@@ -291,6 +307,8 @@ test('should do something', async ({ page, servers, testDb }) => {
   expect(response.ok).toBe(true);
 });
 ```
+
+**Note**: Old custom fixtures in `.legacy-fixtures/` are deprecated. Use helper functions from `fixtures/index.ts` instead.
 
 ## Environment Variables
 
