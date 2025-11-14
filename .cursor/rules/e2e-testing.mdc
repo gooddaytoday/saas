@@ -326,6 +326,25 @@ test('should login with valid credentials', async ({ page }) => {});
 test('login test', async ({ page }) => {});
 ```
 
+### 6. Type Checking - REQUIRED
+
+**ALWAYS run type checking after writing or modifying e2e tests:**
+
+```bash
+# From e2e directory
+cd e2e && yarn type-check
+
+# Or use the npm script
+yarn type-check
+```
+
+**When to type check:**
+
+- After creating new test files
+- After modifying existing tests or helpers
+- After updating imports or type definitions
+- Before committing changes
+
 ## Running Tests
 
 ### Commands
@@ -441,8 +460,10 @@ test('slow test', async ({ page }) => {
 2. **NEVER** use `test.describe()` blocks
 3. **ALWAYS** use `getServers()` and `getTestDb()` helpers for infrastructure access
 4. **ALWAYS** clear database at test start if needed: `await getTestDb().clear()`
-5. Servers are managed automatically in global-setup/teardown
-6. Database is MongoDB Memory Server (in-memory, isolated)
-7. Tests run in parallel by default (4 workers locally, 2 in CI)
-8. Use semantic selectors and explicit waits
-9. Each test must be completely independent
+5. **ALWAYS** run `yarn type-check` after writing or modifying tests
+6. Servers are managed automatically in global-setup/teardown
+7. Database is MongoDB Memory Server (in-memory, isolated)
+8. Tests run in parallel by default (4 workers locally, 2 in CI)
+9. Use semantic selectors and explicit waits
+10. Each test must be completely independent
+11. Avoid importing types from `../api` or `../app` directories
