@@ -115,16 +115,81 @@ tests/
 
 **Progress Overview**: See [plans/README.md](./plans/README.md) for current status and next steps.
 
-## Fixtures
+## Fixtures and Helpers
 
-### Base Fixtures
+### Base Helpers
 
-- **`page`**: Playwright page object
-- **`context`**: Browser context
-- **`servers`**: Object with API and App URLs
-- **`testDb`**: Database utilities (clear, seed data)
+- **`getServers()`**: Returns API and App server URLs
+- **`getTestDb()`**: Returns database utilities (clear collections)
+- **`createAuthSession()`**: Creates authenticated user session (NEW!)
 
-### Usage Example
+### Auth Session Helper
+
+The `createAuthSession()` helper creates an authenticated user in the database and sets up a session in the browser context.
+
+#### Basic Usage
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { createAuthSession } from '../helpers';
+
+test('authenticated user feature', async ({ page }) => {
+  // Create authenticated user
+  const { user } = await createAuthSession(page);
+  
+  // User is now logged in
+  await page.goto('/your-settings');
+  // Test authenticated features
+});
+```
+
+#### With Team (as Leader)
+
+```typescript
+test('team leader feature', async ({ page }) => {
+  const { user, team } = await createAuthSession(page, {
+    withTeam: true,
+    teamRole: 'leader'
+  });
+  
+  // User is team leader
+  expect(team?.teamLeaderId).toBe(user.id);
+});
+```
+
+#### With Team (as Member)
+
+```typescript
+test('team member feature', async ({ page }) => {
+  const { user, team } = await createAuthSession(page, {
+    withTeam: true,
+    teamRole: 'member'
+  });
+  
+  // User is team member (not leader)
+  expect(team?.memberIds).toContain(user.id);
+  expect(team?.teamLeaderId).not.toBe(user.id);
+});
+```
+
+#### Custom User Data
+
+```typescript
+test('custom user', async ({ page }) => {
+  const { user } = await createAuthSession(page, {
+    userData: {
+      displayName: 'John Doe',
+      email: 'john@example.com',
+      darkTheme: true
+    }
+  });
+  
+  expect(user.displayName).toBe('John Doe');
+  expect(user.darkTheme).toBe(true);
+});
+```
+
+### Legacy Fixtures (deprecated, use helpers instead)
 
 ```typescript
 import { test, expect } from '../fixtures';
