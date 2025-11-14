@@ -229,7 +229,7 @@ test('auth-session: should persist session data in database', async ({ page }) =
     expect(sessions.length).toBeGreaterThan(0);
 
     // Find session for our specific user
-    let userSession = null;
+    let userSession: any = null;
     for (const session of sessions) {
       const sessionData = JSON.parse(session.session);
       if (sessionData.passport && sessionData.passport.user === user.id) {
@@ -240,7 +240,7 @@ test('auth-session: should persist session data in database', async ({ page }) =
 
     // Verify session was found and contains correct user ID
     expect(userSession).toBeTruthy();
-    expect(userSession?.passport.user).toBe(user.id);
+    expect(userSession?.passport?.user).toBe(user.id);
   } finally {
     await client.close();
   }

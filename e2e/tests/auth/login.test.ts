@@ -344,8 +344,8 @@ test('should set authentication cookies on page', async ({ page }) => {
   const sessionCookie = cookies.find(cookie => cookie.name === 'connect.sid');
 
   expect(sessionCookie).toBeTruthy();
-  expect(sessionCookie.value).toMatch(/^test-session-/);
-  expect(sessionCookie.httpOnly).toBe(true);
+  expect(sessionCookie?.value).toMatch(/^test-session-/);
+  expect(sessionCookie?.httpOnly).toBe(true);
 
   await cleanupTestUsers();
 });
@@ -383,7 +383,7 @@ test('should validate session for authenticated API requests', async ({ page }) 
 
   // Make API request with session cookie
   const response = await makeApiRequest(servers.apiUrl, '/api/v1/public/get-user', {
-    cookies: { 'connect.sid': sessionCookie.value },
+    cookies: { 'connect.sid': sessionCookie?.value || '' },
   });
 
   // Should return user data (authenticated request)
@@ -431,7 +431,7 @@ test('should complete full authentication flow for user without team', async ({ 
   const cookies = await page.context().cookies();
   const sessionCookie = cookies.find(cookie => cookie.name === 'connect.sid');
   const apiResponse = await makeApiRequest(servers.apiUrl, '/api/v1/public/get-user', {
-    cookies: { 'connect.sid': sessionCookie.value },
+    cookies: { 'connect.sid': sessionCookie?.value || '' },
   });
   const statusCode = apiResponse.status;
   expect(statusCode).toBe(200);
@@ -555,14 +555,16 @@ test('should maintain authentication state across browser sessions', async ({ pa
   const sessionCookie = cookies.find(cookie => cookie.name === 'connect.sid');
 
   // 3. Create new page context (simulating new browser session)
-  const newContext = await page.context().browser().newContext();
+  const browser = page.context().browser();
+  if (!browser) throw new Error('Browser not found');
+  const newContext = await browser.newContext();
   const newPage = await newContext.newPage();
 
   // 4. Set the same session cookie in new context
   await newContext.addCookies([
     {
       name: 'connect.sid',
-      value: sessionCookie.value,
+      value: sessionCookie?.value || '',
       url: servers.appUrl,
       httpOnly: true,
     },

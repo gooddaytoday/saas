@@ -75,6 +75,7 @@ export interface AuthTeam {
   slug: string;
   teamLeaderId: string;
   memberIds: string[];
+  avatarUrl?: string;
 }
 
 /**
@@ -272,7 +273,7 @@ export async function createAuthSession(
       expires: new Date(Date.now() + 1209600000),
     };
 
-    await sessionsCollection.insertOne(sessionData);
+    await sessionsCollection.insertOne(sessionData as any);
 
     // Create session cookie
     const sessionName = process.env.SESSION_NAME || 'saas.sid';
@@ -605,7 +606,7 @@ export async function createTeamContext(
       expires: new Date(Date.now() + 1209600000),
     };
 
-    await sessionsCollection.insertOne(sessionData);
+    await sessionsCollection.insertOne(sessionData as any);
 
     // Create session cookie
     const sessionName = process.env.SESSION_NAME || 'saas.sid';

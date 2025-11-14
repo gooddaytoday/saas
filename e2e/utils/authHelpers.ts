@@ -8,8 +8,10 @@ import { getServers } from '../helpers';
 import { getTestDb } from '../helpers';
 import { generateEmail, createUserData, createTeamData } from './factories';
 import { MongoClient } from 'mongodb';
-import { UserDocument } from '../../api/server/models/User';
-import { TeamDocument } from '../../api/server/models/Team';
+
+// Use generic types to avoid importing from API models (which causes TypeScript to compile them)
+type UserDocument = any;
+type TeamDocument = any;
 
 /**
  * Test user interface
@@ -127,7 +129,7 @@ export async function createUserWithTeamInDb(): Promise<{ user: TestUser; team: 
   try {
     const db = client.db();
     await db.collection('users').updateOne(
-      { _id: user._id },
+      { _id: user._id as any },
       { $set: { defaultTeamSlug: team.slug } }
     );
 
@@ -175,7 +177,7 @@ export async function createSessionForUser(userId: string): Promise<string> {
       _id: sessionId,
       session: JSON.stringify(sessionData),
       expires: sessionData.cookie.expires,
-    });
+    } as any);
 
     return sessionId;
   } finally {
@@ -244,7 +246,7 @@ export async function cleanupTestUsers(): Promise<void> {
 
     // Remove test sessions
     await db.collection('sessions').deleteMany({
-      _id: { $regex: '^test-session-' },
+      _id: { $regex: '^test-session-' } as any,
     });
   } finally {
     await client.close();
