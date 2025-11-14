@@ -849,16 +849,23 @@ describe('CreateDiscussionForm', () => {
     test('handles undefined store gracefully', () => {
       // Этот тест проверяет устойчивость к невалидным данным
       // В реальном коде store должен быть всегда определен
-      expect(() => {
-        render(
-          <CreateDiscussionForm
-            isMobile={false}
-            store={undefined as any}
-            open={true}
-            onClose={jest.fn()}
-          />
-        );
-      }).toThrow(); // Ожидаем ошибку, так как store обязателен
+      // Подавляем console.error для этого ожидаемого исключения
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        expect(() => {
+          render(
+            <CreateDiscussionForm
+              isMobile={false}
+              store={undefined as any}
+              open={true}
+              onClose={jest.fn()}
+            />
+          );
+        }).toThrow(); // Ожидаем ошибку, так как store обязателен
+      } finally {
+        consoleSpy.mockRestore();
+      }
     });
 
     test('handles production URL correctly', () => {

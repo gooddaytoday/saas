@@ -174,6 +174,40 @@ test('debug example', () => {
 4. **Test behaviour, not implementation** – test what the user sees
 5. **One assertion per test** – each test should verify a single behaviour
 
+## Console Error Suppression Strategy (Hybrid Approach)
+
+### Global Suppression (jest.setup.js)
+
+We suppress ONLY truly safe errors that will never be regressions:
+
+- `Warning: ReactDOM.render is no longer supported` - old React API
+- `Warning: React does not recognize the \`disable` - MUI props in mocks
+
+### Local Suppression in Tests
+
+For expected errors in `toThrow()` tests we use local suppression:
+
+```typescript
+test('throws error when team is null', () => {
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  
+  try {
+    expect(() => {
+      render(<DiscussionList store={mockStore} team={null as any} />);
+    }).toThrow();
+  } finally {
+    consoleSpy.mockRestore();
+  }
+});
+```
+
+**Benefits:**
+
+- ✅ Explicitly show where we expect errors
+- ✅ Protection against hidden regressions
+- ✅ Easy to find all places with expected errors (grep by `mockImplementation`)
+- ✅ Don't hide unexpected errors in other tests
+
 ## Useful resources
 
 - [Jest Documentation](https://jestjs.io/docs/getting-started)

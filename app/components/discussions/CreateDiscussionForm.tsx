@@ -183,7 +183,6 @@ class CreateDiscussionForm extends React.Component<Props, State> {
   };
 
   private onContentChanged = (content: string) => {
-    console.log('onContentChanged', content);
     this.setState({ content });
   };
 
@@ -259,7 +258,6 @@ class CreateDiscussionForm extends React.Component<Props, State> {
         `/teams/${currentTeam.slug}/discussions/${discussion.slug}`,
       );
     } catch (error) {
-      console.log(error);
       notify(error);
     } finally {
       this.setState({ disabled: false });

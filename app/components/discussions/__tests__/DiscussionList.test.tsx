@@ -6,9 +6,19 @@ import { observable } from 'mobx';
 
 // Моки для Material-UI компонентов
 jest.mock('@mui/material/Tooltip', () => {
-  return function MockTooltip({ children, title, placement, ...props }: any) {
+  return function MockTooltip({
+    children,
+    title,
+    placement,
+    disableFocusListener,
+    disableTouchListener,
+    ...props
+  }: any) {
+    // Отфильтровать MUI-специфичные props, которые не должны попадать в DOM
+    const domProps = { ...props };
+
     return (
-      <div data-testid="tooltip" data-title={title} data-placement={placement} {...props}>
+      <div data-testid="tooltip" data-title={title} data-placement={placement} {...domProps}>
         {children}
       </div>
     );
@@ -381,9 +391,16 @@ describe('DiscussionList', () => {
   describe('Conditional Rendering', () => {
     test('throws error when team is null', () => {
       // Компонент должен падать при null team, так как пытается вызвать team.loadDiscussions()
-      expect(() => {
-        render(<DiscussionList store={mockStore} team={null as any} isMobile={false} />);
-      }).toThrow();
+      // Подавляем console.error для этого ожидаемого исключения
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        expect(() => {
+          render(<DiscussionList store={mockStore} team={null as any} isMobile={false} />);
+        }).toThrow();
+      } finally {
+        consoleSpy.mockRestore();
+      }
     });
 
     test('handles undefined store gracefully', () => {

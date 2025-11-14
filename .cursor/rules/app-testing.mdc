@@ -655,11 +655,45 @@ Add to `.vscode/launch.json` for debugging:
 
 Refer to [TESTING.md](mdc:app/TESTING.md) for additional examples and details.
 
+## **Console Error Suppression (Hybrid Approach)**
+
+### Global Suppression (jest.setup.js)
+
+Suppress ONLY truly safe errors that will never be regressions:
+
+- `Warning: ReactDOM.render is no longer supported` - old React API
+- `Warning: React does not recognize the \`disable` - MUI props in mocks
+
+### Local Suppression in Tests
+
+For expected errors in `toThrow()` tests use local suppression:
+
+```typescript
+test('throws error when team is null', () => {
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  
+  try {
+    expect(() => {
+      render(<DiscussionList store={mockStore} team={null as any} />);
+    }).toThrow();
+  } finally {
+    consoleSpy.mockRestore();
+  }
+});
+```
+
+**Benefits:**
+- ✅ Explicitly show where we expect errors
+- ✅ Protection against hidden regressions  
+- ✅ Easy to find all places with expected errors (grep by `mockImplementation`)
+- ✅ Don't hide unexpected errors in other tests
+
 ## **References**
 
 - **General TDD principles**: [.cursor/rules/tdd-jest-typescript.mdc](mdc:.cursor/rules/tdd-jest-typescript.mdc)
 - **API Testing**: [.cursor/rules/api-testing.mdc](mdc:.cursor/rules/api-testing.mdc)
 - **E2E Testing**: [.cursor/rules/e2e-testing.mdc](mdc:.cursor/rules/e2e-testing.mdc)
+- **Testing Details**: [app/TESTING.md](mdc:app/TESTING.md) - Full testing guide and examples
 
 ## Lint errors
 
