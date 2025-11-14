@@ -804,11 +804,11 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
   - [x] Тестировать fixture отдельно (10/10 tests passing)
   - [x] Документировать usage (README + examples + summary)
 
-- [ ] **Day 3**: Создать `teamContext` fixture (Задача 2.2)
-  - [ ] Реализовать fixture
-  - [ ] Добавить support для members
-  - [ ] Тестировать fixture
-  - [ ] Документировать
+- [x] **Day 3**: Создать `teamContext` fixture (Задача 2.2) ✅ **COMPLETED**
+  - [x] Реализовать fixture (implemented as helper function `createTeamContext`)
+  - [x] Добавить support для members (membersCount, membersData)
+  - [x] Тестировать fixture (15 comprehensive tests)
+  - [x] Документировать (README with usage examples)
 
 - [ ] **Day 4**: Обновить `fixtures/index.ts` (Задача 2.3)
   - [ ] Экспортировать новые fixtures

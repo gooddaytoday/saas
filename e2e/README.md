@@ -121,7 +121,8 @@ tests/
 
 - **`getServers()`**: Returns API and App server URLs
 - **`getTestDb()`**: Returns database utilities (clear collections)
-- **`createAuthSession()`**: Creates authenticated user session (NEW!)
+- **`createAuthSession()`**: Creates authenticated user session
+- **`createTeamContext()`**: Creates complete team context with owner, members, and invitations (NEW!)
 
 ### Auth Session Helper
 
@@ -186,6 +187,90 @@ test('custom user', async ({ page }) => {
   
   expect(user.displayName).toBe('John Doe');
   expect(user.darkTheme).toBe(true);
+});
+```
+
+### Team Context Helper
+
+The `createTeamContext()` helper creates a complete team setup including owner, members, and invitation tokens.
+
+#### Basic Team with Owner
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { createTeamContext } from '../helpers';
+
+test('team feature', async ({ page }) => {
+  const { owner, team } = await createTeamContext(page);
+  
+  // Owner is logged in as team leader
+  expect(team.teamLeaderId).toBe(owner.id);
+  await page.goto('/team-settings');
+});
+```
+
+#### Team with Members
+
+```typescript
+test('team with members', async ({ page }) => {
+  const { owner, team, members, allMembers } = await createTeamContext(page, {
+    membersCount: 3
+  });
+  
+  // Team has owner + 3 members
+  expect(members).toHaveLength(3);
+  expect(allMembers).toHaveLength(4); // owner + 3 members
+  expect(team.memberIds).toHaveLength(4);
+});
+```
+
+#### Team with Custom Members
+
+```typescript
+test('custom members', async ({ page }) => {
+  const { members } = await createTeamContext(page, {
+    membersData: [
+      { displayName: 'Alice Smith', email: 'alice@example.com' },
+      { displayName: 'Bob Jones', email: 'bob@example.com' }
+    ]
+  });
+  
+  expect(members[0].displayName).toBe('Alice Smith');
+  expect(members[1].displayName).toBe('Bob Jones');
+});
+```
+
+#### Team with Invitations
+
+```typescript
+test('team with invitations', async ({ page }) => {
+  const { team, invitations } = await createTeamContext(page, {
+    invitationEmails: ['invite1@example.com', 'invite2@example.com']
+  });
+  
+  // Invitation tokens created
+  expect(invitations).toHaveLength(2);
+  expect(invitations[0].token).toBeTruthy();
+  expect(invitations[0].teamId).toBe(team.id);
+});
+```
+
+#### Complete Team Setup
+
+```typescript
+test('complete team', async ({ page }) => {
+  const { owner, team, members, invitations } = await createTeamContext(page, {
+    ownerData: { displayName: 'Team Leader' },
+    teamData: { name: 'My Team', slug: 'my-team' },
+    membersCount: 2,
+    invitationEmails: ['pending@example.com']
+  });
+  
+  // Complete setup ready for testing
+  expect(owner.displayName).toBe('Team Leader');
+  expect(team.name).toBe('My Team');
+  expect(members).toHaveLength(2);
+  expect(invitations).toHaveLength(1);
 });
 ```
 
