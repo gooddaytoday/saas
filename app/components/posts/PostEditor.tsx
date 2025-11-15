@@ -225,7 +225,9 @@ class PostEditor extends React.Component<Props, State> {
       return marked.parse(he.decode(postContent)) as string;
     }
 
-    const htmlContent: string = content ? markdownToHtml(content) : '<span>Nothing to preview.</span>';
+    const htmlContent: string = content
+      ? markdownToHtml(content)
+      : '<span>Nothing to preview.</span>';
     this.setState({ htmlContent });
   };
 
