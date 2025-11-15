@@ -249,19 +249,25 @@ describe('EditDiscussionForm', () => {
     test('handles submission error gracefully', async () => {
       const user = userEvent.setup();
       const mockOnClose = jest.fn();
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
       mockDiscussion.editDiscussion.mockRejectedValue(new Error('API Error'));
 
-      render(<EditDiscussionForm {...defaultProps} onClose={mockOnClose} />);
+      try {
+        render(<EditDiscussionForm {...defaultProps} onClose={mockOnClose} />);
 
-      const submitButton = screen.getByRole('button', { name: /update discussion/i });
+        const submitButton = screen.getByRole('button', { name: /update discussion/i });
 
-      await user.click(submitButton);
+        await user.click(submitButton);
 
-      await waitFor(() => {
-        expect(mockDiscussion.editDiscussion).toHaveBeenCalled();
-        expect(notify).toHaveBeenCalledWith(new Error('API Error'));
-        expect(mockOnClose).toHaveBeenCalled();
-      });
+        await waitFor(() => {
+          expect(mockDiscussion.editDiscussion).toHaveBeenCalled();
+          expect(notify).toHaveBeenCalledWith(new Error('API Error'));
+          expect(mockOnClose).toHaveBeenCalled();
+        });
+      } finally {
+        consoleSpy.mockRestore();
+      }
     });
 
     test('disables buttons during submission', async () => {
