@@ -50,7 +50,7 @@ class EditDiscussionForm extends React.Component<Props, State> {
   public static getDerivedStateFromProps(props: Props, state: State) {
     const { discussion } = props;
 
-    if (state.discussionId === discussion._id) {
+    if (!discussion || state.discussionId === discussion._id) {
       return null;
     }
 
@@ -66,9 +66,9 @@ class EditDiscussionForm extends React.Component<Props, State> {
     const { open, store } = this.props;
     const { currentTeam, currentUser } = store;
 
-    const membersMinusCreator = Array.from(currentTeam.members.values()).filter(
-      (user) => user._id !== currentUser._id,
-    );
+    const membersMinusCreator = currentTeam
+      ? Array.from(currentTeam.members.values()).filter((user) => user._id !== currentUser._id)
+      : [];
 
     // console.log(currentTeam.members);
 
@@ -150,6 +150,8 @@ class EditDiscussionForm extends React.Component<Props, State> {
 
   private onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    this.setState({ disabled: true });
 
     const { discussion, store } = this.props;
     const { currentTeam } = store;
