@@ -92,12 +92,14 @@ const createMockUser = (overrides = {}) => ({
   hasCardInformation: true,
   stripeListOfInvoices: {
     object: 'list',
-    data: [{
-      amount_paid: 0,
-      teamName: 'Test Team',
-      created: Date.now(),
-      hosted_invoice_url: 'https://example.com',
-    }] as any,
+    data: [
+      {
+        amount_paid: 0,
+        teamName: 'Test Team',
+        created: Date.now(),
+        hosted_invoice_url: 'https://example.com',
+      },
+    ] as any,
     has_more: false,
   },
   // User methods

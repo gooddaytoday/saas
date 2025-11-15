@@ -40,9 +40,7 @@ jest.mock('../../common/MenuWithMenuItems', () => {
 
             // Find the clicked item by text and call its onClick
             const target = e.target as HTMLElement;
-            const clickedItem = itemOptions.find((item) =>
-              target.textContent?.includes(item.text)
-            );
+            const clickedItem = itemOptions.find((item) => target.textContent?.includes(item.text));
             if (clickedItem) {
               clickedItem.onClick(mockEvent);
             }
@@ -55,11 +53,13 @@ jest.mock('../../common/MenuWithMenuItems', () => {
             key={index}
             data-testid={`menu-item-${index}`}
             data-id={item.dataId}
-            onClick={() => item.onClick({
-              currentTarget: {
-                dataset: { id: item.dataId },
-              },
-            })}
+            onClick={() =>
+              item.onClick({
+                currentTarget: {
+                  dataset: { id: item.dataId },
+                },
+              })
+            }
           >
             {item.text}
           </button>
@@ -136,7 +136,6 @@ const createMockStore = (currentUserId = 'user1', currentTeamSlug = 'test-team')
   };
 };
 
-
 describe('DiscussionActionMenu', () => {
   let mockStore: any;
   let mockDiscussion: any;
@@ -179,11 +178,7 @@ describe('DiscussionActionMenu', () => {
 
       // Act
       render(
-        <DiscussionActionMenu
-          discussion={creatorDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={creatorDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Assert
@@ -206,7 +201,7 @@ describe('DiscussionActionMenu', () => {
           discussion={nonCreatorDiscussion}
           store={mockStore}
           isMobile={false}
-        />
+        />,
       );
 
       // Assert
@@ -219,11 +214,7 @@ describe('DiscussionActionMenu', () => {
     test('does not render EditDiscussionForm by default', () => {
       // Arrange & Act
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Assert
@@ -238,11 +229,7 @@ describe('DiscussionActionMenu', () => {
       mockClipboard.mockResolvedValueOnce(undefined);
 
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -251,7 +238,7 @@ describe('DiscussionActionMenu', () => {
 
       // Assert
       expect(mockClipboard).toHaveBeenCalledWith(
-        'http://localhost:3000/teams/test-team/discussions/test-discussion'
+        'http://localhost:3000/teams/test-team/discussions/test-discussion',
       );
       expect(notify).toHaveBeenCalledWith('You successfully copied URL.');
     });
@@ -263,11 +250,7 @@ describe('DiscussionActionMenu', () => {
       mockClipboard.mockRejectedValueOnce(mockError);
 
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -282,11 +265,7 @@ describe('DiscussionActionMenu', () => {
     test('does nothing when event target has no dataset id', async () => {
       // Arrange
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act - simulate click with no dataset id
@@ -327,11 +306,7 @@ describe('DiscussionActionMenu', () => {
       mockClipboard.mockResolvedValueOnce(undefined);
 
       render(
-        <DiscussionActionMenuProd
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenuProd discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -340,7 +315,7 @@ describe('DiscussionActionMenu', () => {
 
       // Assert
       expect(mockClipboard).toHaveBeenCalledWith(
-        'https://app.example.com/teams/test-team/discussions/test-discussion'
+        'https://app.example.com/teams/test-team/discussions/test-discussion',
       );
 
       // Cleanup
@@ -360,11 +335,7 @@ describe('DiscussionActionMenu', () => {
       };
 
       render(
-        <DiscussionActionMenu
-          discussion={creatorDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={creatorDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -387,7 +358,7 @@ describe('DiscussionActionMenu', () => {
           discussion={mockDiscussion}
           store={storeWithoutTeam}
           isMobile={false}
-        />
+        />,
       );
 
       // Act
@@ -402,11 +373,7 @@ describe('DiscussionActionMenu', () => {
     test('does nothing when event target has no dataset id', async () => {
       // Arrange
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act - simulate click with no dataset id
@@ -441,11 +408,7 @@ describe('DiscussionActionMenu', () => {
       mockStore.currentTeam.deleteDiscussion = mockDeleteDiscussion;
 
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -475,11 +438,7 @@ describe('DiscussionActionMenu', () => {
       mockStore.currentTeam.deleteDiscussion = mockDeleteDiscussion;
 
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -504,11 +463,7 @@ describe('DiscussionActionMenu', () => {
       mockStore.currentTeam.deleteDiscussion = mockDeleteDiscussion;
 
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -534,7 +489,7 @@ describe('DiscussionActionMenu', () => {
           discussion={mockDiscussion}
           store={storeWithoutTeam}
           isMobile={false}
-        />
+        />,
       );
 
       // Act
@@ -556,11 +511,7 @@ describe('DiscussionActionMenu', () => {
       };
 
       render(
-        <DiscussionActionMenu
-          discussion={creatorDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={creatorDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Open the form first
@@ -584,11 +535,7 @@ describe('DiscussionActionMenu', () => {
       delete (global as any).navigator;
 
       render(
-        <DiscussionActionMenu
-          discussion={mockDiscussion}
-          store={mockStore}
-          isMobile={false}
-        />
+        <DiscussionActionMenu discussion={mockDiscussion} store={mockStore} isMobile={false} />,
       );
 
       // Act
@@ -601,6 +548,5 @@ describe('DiscussionActionMenu', () => {
       // Cleanup
       global.navigator = originalNavigator;
     });
-
   });
 });

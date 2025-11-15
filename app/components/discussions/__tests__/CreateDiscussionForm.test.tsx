@@ -5,7 +5,16 @@ import '@testing-library/jest-dom';
 
 // Моки для Material-UI компонентов
 jest.mock('@mui/material/Button', () => {
-  return function MockButton({ children, onClick, type, variant, color, disabled, style, ...props }: any) {
+  return function MockButton({
+    children,
+    onClick,
+    type,
+    variant,
+    color,
+    disabled,
+    style,
+    ...props
+  }: any) {
     return (
       <button
         type={type}
@@ -34,38 +43,48 @@ jest.mock('@mui/material/Dialog', () => {
 
 jest.mock('@mui/material/DialogContent', () => {
   return function MockDialogContent({ children, ...props }: any) {
-    return <div data-testid="dialog-content" {...props}>{children}</div>;
+    return (
+      <div data-testid="dialog-content" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/DialogTitle', () => {
   return function MockDialogTitle({ children, ...props }: any) {
-    return <div data-testid="dialog-title" {...props}>{children}</div>;
+    return (
+      <div data-testid="dialog-title" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/FormControl', () => {
   return function MockFormControl({ children, ...props }: any) {
-    return <div data-testid="form-control" {...props}>{children}</div>;
+    return (
+      <div data-testid="form-control" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/FormHelperText', () => {
   return function MockFormHelperText({ children, ...props }: any) {
-    return <div data-testid="form-helper-text" {...props}>{children}</div>;
+    return (
+      <div data-testid="form-helper-text" {...props}>
+        {children}
+      </div>
+    );
   };
 });
 
 jest.mock('@mui/material/Select', () => {
   return function MockSelect({ children, value, onChange, required, ...props }: any) {
     return (
-      <select
-        value={value}
-        onChange={onChange}
-        required={required}
-        data-testid="select"
-        {...props}
-      >
+      <select value={value} onChange={onChange} required={required} data-testid="select" {...props}>
         {children}
       </select>
     );
@@ -74,19 +93,16 @@ jest.mock('@mui/material/Select', () => {
 
 jest.mock('@mui/material/MenuItem', () => {
   return function MockMenuItem({ children, value, ...props }: any) {
-    return <option value={value} {...props}>{children}</option>;
+    return (
+      <option value={value} {...props}>
+        {children}
+      </option>
+    );
   };
 });
 
 jest.mock('@mui/material/TextField', () => {
-  return function MockTextField({
-    label,
-    helperText,
-    value,
-    onChange,
-    autoFocus,
-    ...props
-  }: any) {
+  return function MockTextField({ label, helperText, value, onChange, autoFocus, ...props }: any) {
     return (
       <div data-testid="text-field">
         {label && <label>{label}</label>}
@@ -239,12 +255,7 @@ describe('CreateDiscussionForm', () => {
   describe('Rendering', () => {
     test('renders dialog when open is true', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       expect(screen.getByTestId('dialog')).toBeInTheDocument();
@@ -258,7 +269,7 @@ describe('CreateDiscussionForm', () => {
           store={mockStore}
           open={false}
           onClose={jest.fn()}
-        />
+        />,
       );
 
       expect(screen.queryByTestId('dialog')).not.toBeInTheDocument();
@@ -266,12 +277,7 @@ describe('CreateDiscussionForm', () => {
 
     test('renders Head component with title when open', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       expect(screen.getByTestId('head')).toBeInTheDocument();
@@ -279,12 +285,7 @@ describe('CreateDiscussionForm', () => {
 
     test('renders all form elements', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       expect(screen.getByTestId('text-field')).toBeInTheDocument();
@@ -296,12 +297,7 @@ describe('CreateDiscussionForm', () => {
 
     test('renders notification type select with options', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const select = screen.getByTestId('select');
@@ -317,39 +313,37 @@ describe('CreateDiscussionForm', () => {
 
     test('renders helper texts', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       expect(screen.getByText('Type name of Discussion')).toBeInTheDocument();
-      expect(screen.getByText('Give a short and informative name to new Discussion')).toBeInTheDocument();
-      expect(screen.getByText('These members will see all posts and be notified about unread posts in this discussion.')).toBeInTheDocument();
-      expect(screen.getByText('Choose how to notify members about new Posts inside Discussion.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Give a short and informative name to new Discussion'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'These members will see all posts and be notified about unread posts in this discussion.',
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Choose how to notify members about new Posts inside Discussion.'),
+      ).toBeInTheDocument();
     });
 
     test('passes correct props to child components', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Проверяем MemberChooser
       expect(mockMemberChooser).toHaveBeenCalledWith(
         expect.objectContaining({
           members: Array.from(mockStore.currentTeam.members.values()).filter(
-            (user: any) => user._id !== mockStore.currentUser._id
+            (user: any) => user._id !== mockStore.currentUser._id,
           ),
           selectedMemberIds: [],
           helperText: expect.any(String),
-        })
+        }),
       );
 
       // Проверяем PostEditor
@@ -359,7 +353,7 @@ describe('CreateDiscussionForm', () => {
           members: Array.from(mockStore.currentTeam.members.values()),
           store: mockStore,
           parentComponent: 'CDF',
-        })
+        }),
       );
     });
   });
@@ -367,12 +361,7 @@ describe('CreateDiscussionForm', () => {
   describe('Form Interactions', () => {
     test('updates name when typing in text field', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const input = screen.getByTestId('text-input');
@@ -383,12 +372,7 @@ describe('CreateDiscussionForm', () => {
 
     test('updates memberIds when MemberChooser changes', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Имитируем изменение участников через сохраненную функцию
@@ -404,12 +388,7 @@ describe('CreateDiscussionForm', () => {
 
     test('updates notification type when select changes', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const select = screen.getByTestId('select');
@@ -420,12 +399,7 @@ describe('CreateDiscussionForm', () => {
 
     test('updates content when PostEditor changes', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const textarea = screen.getByTestId('post-editor-content');
@@ -438,17 +412,12 @@ describe('CreateDiscussionForm', () => {
   describe('Form Validation', () => {
     test('shows error when submitting without name', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       expect(mockNotify).toHaveBeenCalledWith('Name is required');
@@ -457,21 +426,16 @@ describe('CreateDiscussionForm', () => {
 
     test('shows error when submitting without content', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем имя
       const input = screen.getByTestId('text-input');
       await user.type(input, 'Test Discussion');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       expect(mockNotify).toHaveBeenCalledWith('Content is required');
@@ -480,12 +444,7 @@ describe('CreateDiscussionForm', () => {
 
     test('notification type defaults to default value', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const select = screen.getByTestId('select');
@@ -495,12 +454,7 @@ describe('CreateDiscussionForm', () => {
     test('shows error when team is not selected', async () => {
       // Создаем компонент с нормальным store для рендеринга
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем форму
@@ -517,9 +471,9 @@ describe('CreateDiscussionForm', () => {
         writable: true,
       });
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       expect(mockNotify).toHaveBeenCalledWith('Team have not selected');
@@ -537,12 +491,7 @@ describe('CreateDiscussionForm', () => {
       const onClose = jest.fn();
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={onClose}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={onClose} />,
       );
 
       // Заполняем форму
@@ -552,9 +501,9 @@ describe('CreateDiscussionForm', () => {
       const textarea = screen.getByTestId('post-editor-content');
       await user.type(textarea, 'Test content');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       await waitFor(() => {
@@ -569,7 +518,7 @@ describe('CreateDiscussionForm', () => {
         expect(mockNotify).toHaveBeenCalledWith('You successfully added new Discussion.');
         expect(mockRouterPush).toHaveBeenCalledWith(
           `/discussion?teamSlug=test-team&discussionSlug=test-discussion`,
-          `/teams/test-team/discussions/test-discussion`
+          `/teams/test-team/discussions/test-discussion`,
         );
         expect(onClose).toHaveBeenCalled();
       });
@@ -589,12 +538,7 @@ describe('CreateDiscussionForm', () => {
       mockStore.currentTeam.addDiscussion.mockResolvedValue(emailDiscussion);
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем форму
@@ -608,9 +552,9 @@ describe('CreateDiscussionForm', () => {
       const select = screen.getByTestId('select');
       await user.selectOptions(select, 'email');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       await waitFor(() => {
@@ -634,12 +578,7 @@ describe('CreateDiscussionForm', () => {
 
     test('includes selected members in discussion creation', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем форму
@@ -656,9 +595,9 @@ describe('CreateDiscussionForm', () => {
         }
       });
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       await waitFor(() => {
@@ -677,12 +616,7 @@ describe('CreateDiscussionForm', () => {
       mockStore.currentTeam.addDiscussion.mockRejectedValue(error);
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем форму
@@ -692,9 +626,9 @@ describe('CreateDiscussionForm', () => {
       const textarea = screen.getByTestId('post-editor-content');
       await user.type(textarea, 'Test content');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       await waitFor(() => {
@@ -709,12 +643,7 @@ describe('CreateDiscussionForm', () => {
       mockDiscussion.addPost.mockRejectedValue(error);
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем форму
@@ -724,9 +653,9 @@ describe('CreateDiscussionForm', () => {
       const textarea = screen.getByTestId('post-editor-content');
       await user.type(textarea, 'Test content');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       await user.click(submitButton!);
 
       await waitFor(() => {
@@ -740,17 +669,12 @@ describe('CreateDiscussionForm', () => {
       const onClose = jest.fn();
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={onClose}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={onClose} />,
       );
 
-      const cancelButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Cancel')
-      );
+      const cancelButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Cancel'));
       await user.click(cancelButton!);
 
       expect(onClose).toHaveBeenCalled();
@@ -758,12 +682,7 @@ describe('CreateDiscussionForm', () => {
 
     test('resets form state when handleClose is called', async () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Изменяем состояние
@@ -774,9 +693,9 @@ describe('CreateDiscussionForm', () => {
       await user.type(textarea, 'Test content');
 
       // Закрываем диалог
-      const cancelButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Cancel')
-      );
+      const cancelButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Cancel'));
       await user.click(cancelButton!);
 
       // Проверяем что состояние сброшено (компонент должен быть перерендерен)
@@ -787,12 +706,7 @@ describe('CreateDiscussionForm', () => {
   describe('Mobile Responsiveness', () => {
     test('applies mobile styles when isMobile is true', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={true}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={true} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const dialog = screen.getByTestId('dialog');
@@ -805,12 +719,7 @@ describe('CreateDiscussionForm', () => {
 
     test('dialog is always fullscreen', () => {
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       const dialog = screen.getByTestId('dialog');
@@ -834,7 +743,7 @@ describe('CreateDiscussionForm', () => {
           store={storeWithEmptyMembers}
           open={true}
           onClose={jest.fn()}
-        />
+        />,
       );
 
       expect(screen.getByTestId('member-chooser')).toBeInTheDocument();
@@ -842,7 +751,7 @@ describe('CreateDiscussionForm', () => {
       expect(mockMemberChooser).toHaveBeenCalledWith(
         expect.objectContaining({
           members: [],
-        })
+        }),
       );
     });
 
@@ -860,7 +769,7 @@ describe('CreateDiscussionForm', () => {
               store={undefined as any}
               open={true}
               onClose={jest.fn()}
-            />
+            />,
           );
         }).toThrow(); // Ожидаем ошибку, так как store обязателен
       } finally {
@@ -871,19 +780,18 @@ describe('CreateDiscussionForm', () => {
     test('handles production URL correctly', () => {
       // Мокаем production окружение
       const originalEnv = process.env;
-      process.env = { ...originalEnv, NODE_ENV: 'production', NEXT_PUBLIC_PRODUCTION_URL_APP: 'https://example.com' };
+      process.env = {
+        ...originalEnv,
+        NODE_ENV: 'production',
+        NEXT_PUBLIC_PRODUCTION_URL_APP: 'https://example.com',
+      };
 
       const mockDiscussion = createMockDiscussion();
       mockDiscussion.notificationType = 'email';
       mockStore.currentTeam.addDiscussion.mockResolvedValue(mockDiscussion);
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем и отправляем форму
@@ -896,9 +804,9 @@ describe('CreateDiscussionForm', () => {
       const select = screen.getByTestId('select');
       user.selectOptions(select, 'email');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
       user.click(submitButton!);
 
       // Восстанавливаем окружение
@@ -910,18 +818,13 @@ describe('CreateDiscussionForm', () => {
     test('disables buttons during submission', async () => {
       // Создаем медленный промис для имитации загрузки
       let resolvePromise: any;
-      const slowPromise = new Promise(resolve => {
+      const slowPromise = new Promise((resolve) => {
         resolvePromise = resolve;
       });
       mockStore.currentTeam.addDiscussion.mockReturnValue(slowPromise);
 
       render(
-        <CreateDiscussionForm
-          isMobile={false}
-          store={mockStore}
-          open={true}
-          onClose={jest.fn()}
-        />
+        <CreateDiscussionForm isMobile={false} store={mockStore} open={true} onClose={jest.fn()} />,
       );
 
       // Заполняем форму
@@ -931,9 +834,9 @@ describe('CreateDiscussionForm', () => {
       const textarea = screen.getByTestId('post-editor-content');
       await user.type(textarea, 'Test content');
 
-      const submitButton = screen.getAllByRole('button').find(btn =>
-        btn.textContent?.includes('Create Discussion')
-      );
+      const submitButton = screen
+        .getAllByRole('button')
+        .find((btn) => btn.textContent?.includes('Create Discussion'));
 
       // Нажимаем submit
       await user.click(submitButton!);
@@ -941,8 +844,11 @@ describe('CreateDiscussionForm', () => {
       // Проверяем что кнопки disabled
       await waitFor(() => {
         const buttons = screen.getAllByRole('button');
-        buttons.forEach(button => {
-          if (button.textContent?.includes('Create Discussion') || button.textContent?.includes('Cancel')) {
+        buttons.forEach((button) => {
+          if (
+            button.textContent?.includes('Create Discussion') ||
+            button.textContent?.includes('Cancel')
+          ) {
             expect(button).toBeDisabled();
           }
         });
