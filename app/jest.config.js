@@ -15,13 +15,12 @@ const customJestConfig = {
     // Handle module aliases (this matches paths in tsconfig.json and Jest)
     '^@/(.*)$': '<rootDir>/$1',
     '^~/(.*)$': '<rootDir>/$1',
-    // Mock MUI for theme tests
-    '^@mui/material/styles$': '<rootDir>/__mocks__/@mui/material/styles.js',
   },
   collectCoverageFrom: [
     'components/**/*.{js,jsx,ts,tsx}',
     'pages/**/*.{js,jsx,ts,tsx}',
     'lib/**/*.{js,jsx,ts,tsx}',
+    '!lib/theme.ts',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/.next/**',
