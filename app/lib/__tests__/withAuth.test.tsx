@@ -93,7 +93,7 @@ describe('withAuth HOC', () => {
         expect.objectContaining({
           customProp: 'value',
           isServer: false,
-        })
+        }),
       );
     });
 
@@ -164,7 +164,6 @@ describe('withAuth HOC', () => {
       expect(Router.push).toHaveBeenCalledWith('/login');
     });
 
-
     test('should not redirect when user has defaultTeamSlug and loginRequired', () => {
       // Arrange
       mockStore.currentUser = {
@@ -201,7 +200,7 @@ describe('withAuth HOC', () => {
       // Assert
       expect(Router.push).toHaveBeenCalledWith(
         '/your-settings?teamSlug=my-team',
-        '/teams/my-team/your-settings'
+        '/teams/my-team/your-settings',
       );
     });
 

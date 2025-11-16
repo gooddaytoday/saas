@@ -12,5 +12,15 @@
     "e2e/.test-state": true,
     "e2e/playwright-report": true,
     "e2e/test-results": true
-  }
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
 }
