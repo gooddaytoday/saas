@@ -1,4 +1,3 @@
-
 // https://developers.google.com/analytics/devguides/collection/gtagjs/pages
 export const pageview = (url) => {
   const { NEXT_PUBLIC_GA_MEASUREMENT_ID } = process.env;
