@@ -1,7 +1,7 @@
-const { NEXT_PUBLIC_GA_MEASUREMENT_ID } = process.env;
 
 // https://developers.google.com/analytics/devguides/collection/gtagjs/pages
 export const pageview = (url) => {
+  const { NEXT_PUBLIC_GA_MEASUREMENT_ID } = process.env;
   (window as any).gtag('config', NEXT_PUBLIC_GA_MEASUREMENT_ID, {
     page_location: url,
   });
