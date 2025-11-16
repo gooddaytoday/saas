@@ -88,8 +88,12 @@ class Discussion {
   }
 
   public changeLocalCache(data) {
-    this.name = data.name;
-    this.memberIds.replace(data.memberIds || []);
+    if (data.name !== undefined) {
+      this.name = data.name;
+    }
+    if (data.memberIds !== undefined) {
+      this.memberIds.replace(data.memberIds);
+    }
   }
 
   get members() {
@@ -109,7 +113,8 @@ class Discussion {
     this.isLoadingPosts = true;
 
     try {
-      const { posts = [] } = await getPostListApiMethod(this._id);
+      const result = await getPostListApiMethod(this._id);
+      const { posts = [] } = result || {};
 
       runInAction(() => {
         const postObjs = posts.map((t) => new Post({ discussion: this, store: this.store, ...t }));
@@ -210,8 +215,10 @@ class Discussion {
   }
 
   public deleteDiscussionFromLocalCache(discussionId: string) {
-    const discussion = this.team.discussions.find((item) => item._id === discussionId);
-    this.team.discussions.remove(discussion);
+    const index = this.team.discussions.findIndex((item) => item._id === discussionId);
+    if (index !== -1) {
+      this.team.discussions.splice(index, 1);
+    }
   }
 
   public handlePostRealtimeEvent(data) {
@@ -234,8 +241,10 @@ class Discussion {
   }
 
   public deletePostFromLocalCache(postId) {
-    const post = this.posts.find((t) => t._id === postId);
-    this.posts.remove(post);
+    const index = this.posts.findIndex((t) => t._id === postId);
+    if (index !== -1) {
+      this.posts.splice(index, 1);
+    }
   }
 
   public async sendDataToLambda({
