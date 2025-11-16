@@ -695,20 +695,27 @@ describe('PostEditor', () => {
       const error = new Error('Upload failed');
       (getSignedRequestForUploadApiMethod as jest.Mock).mockRejectedValueOnce(error);
 
-      render(<PostEditor {...defaultProps} />);
+      // Подавляем console.log для ожидаемой ошибки в тесте
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-      const imageFile = new File(['image data'], 'test.jpg', {
-        type: 'image/jpeg',
-      });
+      try {
+        render(<PostEditor {...defaultProps} />);
 
-      await act(async () => {
-        fireEvent.change(fileInput, { target: { files: [imageFile] } });
-      });
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        const imageFile = new File(['image data'], 'test.jpg', {
+          type: 'image/jpeg',
+        });
 
-      await waitFor(() => {
-        expect(notify).toHaveBeenCalledWith(error);
-      });
+        await act(async () => {
+          fireEvent.change(fileInput, { target: { files: [imageFile] } });
+        });
+
+        await waitFor(() => {
+          expect(notify).toHaveBeenCalledWith(error);
+        });
+      } finally {
+        consoleSpy.mockRestore();
+      }
     });
 
     test('calls NProgress.done when upload fails', async () => {
@@ -716,20 +723,27 @@ describe('PostEditor', () => {
         new Error('Upload failed'),
       );
 
-      render(<PostEditor {...defaultProps} />);
+      // Подавляем console.log для ожидаемой ошибки в тесте
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-      const imageFile = new File(['image data'], 'test.jpg', {
-        type: 'image/jpeg',
-      });
+      try {
+        render(<PostEditor {...defaultProps} />);
 
-      await act(async () => {
-        fireEvent.change(fileInput, { target: { files: [imageFile] } });
-      });
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        const imageFile = new File(['image data'], 'test.jpg', {
+          type: 'image/jpeg',
+        });
 
-      await waitFor(() => {
-        expect(NProgress.done).toHaveBeenCalled();
-      });
+        await act(async () => {
+          fireEvent.change(fileInput, { target: { files: [imageFile] } });
+        });
+
+        await waitFor(() => {
+          expect(NProgress.done).toHaveBeenCalled();
+        });
+      } finally {
+        consoleSpy.mockRestore();
+      }
     });
 
     test('clears file input after upload attempt', async () => {
