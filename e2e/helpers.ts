@@ -195,16 +195,17 @@ export async function createAuthSession(
 
     // Create team if requested
     if (withTeam) {
-      const teamName = teamData.name || `Test Team ${Date.now()}`;
-      const teamSlug = teamData.slug || `team-${Date.now()}`;
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const teamName = teamData.name || `Test Team ${uniqueId}`;
+      const teamSlug = teamData.slug || `team-${uniqueId}`;
 
       // If teamRole is 'member', we need to create a team leader first
       let actualLeaderId = userId;
       if (teamRole === 'member') {
         // Create a team leader user
         const leaderEmail = generateEmail();
-        const leaderDisplayName = `Team Leader ${Date.now()}`;
-        const leaderSlug = `leader-${Date.now()}`;
+        const leaderDisplayName = `Team Leader ${uniqueId}`;
+        const leaderSlug = `leader-${uniqueId}`;
 
         const leaderDoc = {
           email: leaderEmail,
@@ -460,8 +461,9 @@ export async function createTeamContext(
 
     // 1. Create team owner (leader)
     const ownerEmail = ownerData.email || generateEmail();
-    const ownerDisplayName = ownerData.displayName || `Team Leader ${Date.now()}`;
-    const ownerSlug = ownerData.slug || `leader-${Date.now()}`;
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const ownerDisplayName = ownerData.displayName || `Team Leader ${uniqueId}`;
+    const ownerSlug = ownerData.slug || `leader-${uniqueId}`;
 
     const ownerDoc = {
       email: ownerEmail,
@@ -478,8 +480,8 @@ export async function createTeamContext(
     const ownerId = ownerResult.insertedId.toString();
 
     // 2. Create team
-    const teamName = teamData.name || `Test Team ${Date.now()}`;
-    const teamSlug = teamData.slug || `team-${Date.now()}`;
+    const teamName = teamData.name || `Test Team ${uniqueId}`;
+    const teamSlug = teamData.slug || `team-${uniqueId}`;
 
     const teamDoc = {
       name: teamName,

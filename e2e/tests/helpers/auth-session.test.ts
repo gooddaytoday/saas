@@ -181,8 +181,14 @@ test('auth-session: should persist user data in database', async ({ page }) => {
   const testDb = await getTestDb();
   await testDb.clear();
 
+  // Use unique email to avoid conflicts in parallel runs
+  const uniqueEmail = `test-persist-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@example.com`;
+
   const { user } = await createAuthSession(page, {
-    userData: { displayName: 'Persistent User' },
+    userData: { 
+      email: uniqueEmail,
+      displayName: 'Persistent User' 
+    },
   });
 
   // Verify user is in database
@@ -197,10 +203,12 @@ test('auth-session: should persist user data in database', async ({ page }) => {
     const db = client.db();
     const usersCollection = db.collection('users');
 
-    const dbUser = await usersCollection.findOne({ email: user.email });
+    // Find by the specific email we created
+    const dbUser = await usersCollection.findOne({ email: uniqueEmail });
 
     expect(dbUser).toBeTruthy();
     expect(dbUser?.displayName).toBe('Persistent User');
+    expect(dbUser?.email).toBe(uniqueEmail);
     expect(dbUser?.email).toBe(user.email);
   } finally {
     await client.close();
