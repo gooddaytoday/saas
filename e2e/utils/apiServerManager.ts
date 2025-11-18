@@ -32,6 +32,7 @@ export async function startApiServer(config: ApiServerConfig): Promise<void> {
     URL_API: `http://localhost:${port}`,
     NEXT_PUBLIC_URL_API: `http://localhost:${port}`,
     LOG_LEVEL: 'error',
+    NO_EMAIL: 'true',
     ...env,
   };
 

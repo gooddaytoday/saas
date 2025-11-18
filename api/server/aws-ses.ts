@@ -1,6 +1,11 @@
 import * as aws from 'aws-sdk';
 
 export default function sendEmail(options) {
+  if (process.env.NO_EMAIL) {
+    console.log('Email sending skipped (NO_EMAIL set)');
+    return Promise.resolve({});
+  }
+
   const ses = new aws.SES({
     apiVersion: 'latest',
     region: process.env.AWS_REGION,

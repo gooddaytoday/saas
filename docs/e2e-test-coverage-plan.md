@@ -582,7 +582,7 @@ export function createPostData(overrides = {}) {
    - [ ] Базовые helpers (waitForResponse, getAuthCookie) - частично готово
 
 2. **P0: Smoke Tests**
-   - [ ] `01-smoke/servers.test.ts` (5-7 тестов)
+   - [x] `01-smoke/servers.test.ts` (5-7 тестов)
    - [ ] `01-smoke/basic-pages.test.ts` (8-10 тестов)
 
 3. **P0: Auth Tests**

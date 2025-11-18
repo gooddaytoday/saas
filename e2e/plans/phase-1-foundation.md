@@ -39,11 +39,12 @@
   - `waitForPort()`, `waitForServer()` (предполагается)
 
 #### Тесты (30%)
-- [x] **Smoke tests** - `tests/smoke.test.ts` (4 теста)
+- [x] **Smoke tests** - `tests/smoke.test.ts` (4 теста) + `tests/01-smoke/servers.test.ts` (6 тестов) ✅ **servers.test.ts COMPLETED**
   - Load login page
   - API server running
   - Database connection
   - App navigation
+  - **NEW**: Server health checks, API endpoints validation, MongoDB operations
 - [x] **Login/Auth tests** - `tests/auth/login.test.ts` (40+ тестов!)
   - UI login page checks
   - Google OAuth button
@@ -119,7 +120,7 @@
 
 | # | Задача | Статус | Файлы | Тестов |
 |---|--------|--------|-------|--------|
-| 3.1 | Расширить smoke.test.ts | 🟡 Частично | `tests/01-smoke/servers.test.ts` | 5-7 |
+| 3.1 | Расширить smoke.test.ts | ✅ Завершено | `tests/01-smoke/servers.test.ts` | 5-7 |
 | 3.2 | Создать basic-pages.test.ts | 🔴 TODO | `tests/01-smoke/basic-pages.test.ts` | 8-10 |
 
 ### 2.4 P0: Auth Tests (TODO 🟡)
@@ -817,7 +818,7 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
   - [x] Обновить документацию (fixtures/README.md, e2e/README.md)
 
 - [ ] **Day 5**: Smoke tests (Задачи 3.1, 3.2)
-  - [ ] Создать `01-smoke/servers.test.ts` (5-7 тестов)
+  - [x] Создать `01-smoke/servers.test.ts` (5-7 тестов) ✅ **COMPLETED**
   - [ ] Создать `01-smoke/basic-pages.test.ts` (8-10 тестов)
   - [ ] Запустить и отладить
   - [ ] Проверить стабильность (flaky?)
