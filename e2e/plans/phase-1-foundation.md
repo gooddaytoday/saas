@@ -2,8 +2,8 @@
 
 > **Период**: Week 1-2  
 > **Цель**: Базовая инфраструктура + P0 критические тесты  
-> **Статус**: 🟡 В процессе  
-> **Прогресс**: ~50% (инфраструктура ✅, fixtures ✅, осталось: smoke tests + auth reorg + onboarding)
+> **Статус**: 🟢 Smoke tests завершены  
+> **Прогресс**: ~60% (инфраструктура ✅, fixtures ✅, smoke tests ✅, осталось: auth reorg + onboarding)
 
 ---
 
@@ -116,12 +116,12 @@
 | 2.3 | Обновить `fixtures/index.ts` | ✅ Готово | `fixtures/index.ts` | **P0 - MEDIUM** |
 | 2.4 | Добавить `waitForResponse` helper | 🔴 TODO | `utils/apiHelpers.ts` | **P1 - LOW** |
 
-### 2.3 P0: Smoke Tests (TODO 🔴)
+### 2.3 P0: Smoke Tests (DONE ✅)
 
 | # | Задача | Статус | Файлы | Тестов |
 |---|--------|--------|-------|--------|
 | 3.1 | Расширить smoke.test.ts | ✅ Завершено | `tests/01-smoke/servers.test.ts` | 5-7 |
-| 3.2 | Создать basic-pages.test.ts | 🔴 TODO | `tests/01-smoke/basic-pages.test.ts` | 8-10 |
+| 3.2 | Создать basic-pages.test.ts | ✅ Завершено | `tests/01-smoke/basic-pages.test.ts` | 13 |
 
 ### 2.4 P0: Auth Tests (TODO 🟡)
 
@@ -817,11 +817,11 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
   - [x] Создать централизованный export point
   - [x] Обновить документацию (fixtures/README.md, e2e/README.md)
 
-- [ ] **Day 5**: Smoke tests (Задачи 3.1, 3.2)
+- [x] **Day 5**: Smoke tests (Задачи 3.1, 3.2) ✅ **COMPLETED**
   - [x] Создать `01-smoke/servers.test.ts` (5-7 тестов) ✅ **COMPLETED**
-  - [ ] Создать `01-smoke/basic-pages.test.ts` (8-10 тестов)
-  - [ ] Запустить и отладить
-  - [ ] Проверить стабильность (flaky?)
+  - [x] Создать `01-smoke/basic-pages.test.ts` (13 тестов) ✅ **COMPLETED**
+  - [x] Запустить и отладить ✅ **COMPLETED**
+  - [x] Проверить стабильность (все 83 теста проходят) ✅ **COMPLETED**
 
 ### Week 2: Auth & Onboarding Tests
 
@@ -862,10 +862,10 @@ test('@P0 @auth @passwordless login with valid token', async ({ page }) => {
    - [x] `fixtures/index.ts` централизованный export point создан
    - [x] Документация по usage (fixtures/README.md, e2e/README.md)
 
-2. **P0 Smoke tests** (13-17 тестов)
+2. **P0 Smoke tests** (18-17 тестов) ✅ **COMPLETED**
    - [x] `01-smoke/servers.test.ts` (5-7 тестов) проходят
-   - [x] `01-smoke/basic-pages.test.ts` (8-10 тестов) проходят
-   - [x] Все тесты стабильные (не flaky)
+   - [x] `01-smoke/basic-pages.test.ts` (13 тестов) проходят - **все 13 тестов стабильны**
+   - [x] Все тесты стабильные (не flaky) - **83/83 проходят**
 
 3. **P0 Auth tests** (17-23 теста)
    - [x] `02-auth/passwordless.test.ts` (8-10 тестов) проходят
