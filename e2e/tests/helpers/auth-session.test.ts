@@ -185,9 +185,9 @@ test('auth-session: should persist user data in database', async ({ page }) => {
   const uniqueEmail = `test-persist-${Date.now()}-${Math.random().toString(36).substring(2, 9)}@example.com`;
 
   const { user } = await createAuthSession(page, {
-    userData: { 
+    userData: {
       email: uniqueEmail,
-      displayName: 'Persistent User' 
+      displayName: 'Persistent User'
     },
   });
 

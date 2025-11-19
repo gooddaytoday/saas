@@ -19,21 +19,21 @@ import { getServers, getTestDb, createAuthSession } from '../../helpers';
  */
 test('@P0 @smoke login page loads without errors', async ({ page }) => {
   const servers = await getServers();
-  
+
   // Navigate to login page
   await page.goto(servers.appUrl + '/login');
-  
+
   // Check title
   await expect(page).toHaveTitle(/login|sign/i);
-  
+
   // Check heading
   const heading = page.locator('text=/Log in|Sign up|Sign in/i').first();
   await expect(heading).toBeVisible({ timeout: 10000 });
-  
+
   // Check Google OAuth button exists
   const googleButton = page.locator('a[href*="google"], button:has-text("Google")').first();
   await expect(googleButton).toBeVisible();
-  
+
   // Wait for page to load
   await page.waitForLoadState('domcontentloaded');
 });
@@ -46,7 +46,7 @@ test('@P0 @smoke login page loads without errors', async ({ page }) => {
  */
 test('@P0 @smoke login-cached page loads without errors', async ({ page }) => {
   const servers = await getServers();
-  
+
   // Use try-catch because this page might redirect or fail
   try {
     await page.goto(servers.appUrl + '/login-cached', { waitUntil: 'domcontentloaded', timeout: 5000 });
@@ -54,7 +54,7 @@ test('@P0 @smoke login-cached page loads without errors', async ({ page }) => {
     // Page might redirect or have navigation issues, that's ok for smoke test
     return; // Exit early if navigation fails
   }
-  
+
   // Check if page is still accessible before getting content
   try {
     const content = await page.content();
@@ -236,8 +236,8 @@ test('@P0 @smoke team-settings loads for team leader', async ({ page }) => {
 
     // Should show team management UI
     const content = await page.content();
-    const hasTeamContent = 
-      content.includes('team') || 
+    const hasTeamContent =
+      content.includes('team') ||
       content.includes('Team') ||
       content.includes('settings') ||
       content.includes('Settings');
@@ -300,8 +300,8 @@ test('@P0 @smoke discussion page loads for authenticated team member', async ({ 
 
     // Page should load
     const content = await page.content();
-    const hasDiscussionUI = 
-      content.includes('discussion') || 
+    const hasDiscussionUI =
+      content.includes('discussion') ||
       content.includes('Discussion') ||
       content.includes('No discussions') ||
       content.includes('Create');
@@ -364,8 +364,8 @@ test('@P0 @smoke billing page loads for team leader', async ({ page }) => {
 
     // Should show billing UI
     const content = await page.content();
-    const hasBillingUI = 
-      content.includes('billing') || 
+    const hasBillingUI =
+      content.includes('billing') ||
       content.includes('Billing') ||
       content.includes('subscription') ||
       content.includes('Subscription') ||
