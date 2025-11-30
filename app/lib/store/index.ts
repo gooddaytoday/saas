@@ -94,7 +94,7 @@ class Store {
   }
 
   public async setCurrentTeam(team) {
-    if (this.currentTeam) {
+    if (this.currentTeam && team) {
       if (this.currentTeam.slug === team.slug) {
         return;
       }
